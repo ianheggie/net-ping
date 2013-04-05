@@ -37,6 +37,10 @@ module Net
     # was this ping proxied?
     attr_accessor :proxied
 
+    # return the response so it can be inspected
+
+    attr_accessor :response
+
     # Creates and returns a new Ping::HTTP object. The default port is the
     # port associated with the URI. The default timeout is 5 seconds.
     #
@@ -72,38 +76,38 @@ module Net
 
       start_time = Time.now
 
-      response = do_ping(uri)
+      self.response = do_ping(uri)
 
-      if response.is_a?(Net::HTTPSuccess)
+      if self.response.is_a?(Net::HTTPSuccess)
         bool = true
-      elsif redirect?(response) # Check code, HTTPRedirection does not always work
+      elsif redirect? # Check code, HTTPRedirection does not always work
         if @follow_redirect
-          @warning = response.message
+          @warning = self.response.message
           rlimit   = 0
 
-          while redirect?(response)
+          while redirect?
             if rlimit >= redirect_limit
               @exception = "Redirect limit exceeded"
               break
             end
-            redirect = URI.parse(response['location'])
+            redirect = URI.parse(self.response['location'])
             redirect = uri + redirect if redirect.relative?
-            response = do_ping(redirect)
+            self.response = do_ping(redirect)
             rlimit   += 1
           end
 
-          if response.is_a?(Net::HTTPSuccess)
+          if self.response.is_a?(Net::HTTPSuccess)
             bool = true
           else
             @warning   = nil
-            @exception ||= response.message
+            @exception ||= self.response.message
           end
 
         else
-          @exception = response.message
+          @exception = self.response.message
         end
       else
-        @exception ||= response.message
+        @exception ||= self.response.message
       end
 
       # There is no duration if the ping failed
@@ -120,8 +124,8 @@ module Net
 
     private
 
-    def redirect?(response)
-      response && response.code.to_i >= 300 && response.code.to_i < 400
+    def redirect?
+      self.response && self.response.code.to_i >= 300 && self.response.code.to_i < 400
     end
 
     def do_ping(uri)
