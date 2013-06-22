@@ -31,19 +31,14 @@ module Net
     # The maximum data size that can be sent in a UDP ping.
     MAX_DATA = 64
       
-    # The data to send to the remote host. By default this is 'ping'.
-    # This should be MAX_DATA size characters or less.
-    # 
-    attr_reader :data
-      
     # Creates and returns a new Ping::UDP object.  This is effectively
     # identical to its superclass constructor.
     # 
     def initialize(host=nil, port=nil, timeout=5)
-      @data = 'ping'
-
       super(host, port, timeout)
 
+      # Default data to 'ping' for UDP
+      @data = 'ping' 
       @bind_host = nil
       @bind_port = nil
     end
@@ -89,7 +84,7 @@ module Net
         Timeout.timeout(@timeout){
           udp.connect(host, @port)
           udp.send(@data, 0)
-          array = udp.recvfrom(MAX_DATA)
+          @response_data, array = udp.recvfrom(MAX_DATA)
         }
       rescue Errno::ECONNREFUSED, Errno::ECONNRESET => err
         if @@service_check
@@ -100,7 +95,7 @@ module Net
       rescue Exception => err
         @exception = err
       else
-        if array[0] == @data
+        if @response_data == @data
           bool = true
         end
       ensure

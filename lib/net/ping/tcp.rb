@@ -45,6 +45,10 @@ module Net
         Timeout.timeout(@timeout){
           begin
             tcp = TCPSocket.new(host, @port)
+            if @data
+              tcp.write(@data)
+              @response_data = tcp.read
+            end
           rescue Errno::ECONNREFUSED => err
             if @@service_check
               bool = true
