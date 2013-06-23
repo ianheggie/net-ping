@@ -95,7 +95,7 @@ module Net
       rescue Exception => err
         @exception = err
       else
-        if @response_data == @data
+        if @response_data #== @data # response doesn't have to match data sent
           bool = true
         end
       ensure
