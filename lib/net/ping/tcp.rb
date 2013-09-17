@@ -46,9 +46,14 @@ module Net
           begin
             tcp = TCPSocket.new(host, @port)
             if @data
-              tcp.write(@data)
-              @response_data = tcp.read
+              tcp.puts(@data)
+              response = []
+              while data = tcp.gets
+                response << data
+              end
+              @response_data = response.join if response.any?
             end
+
           rescue Errno::ECONNREFUSED => err
             if @@service_check
               bool = true
