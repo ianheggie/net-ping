@@ -45,7 +45,7 @@ module Net
         Timeout.timeout(@timeout){
           begin
             tcp = TCPSocket.new(host, @port)
-            if @data
+            unless @data.nil? || @data.empty?
               tcp.puts(@data)
               response = []
               while data = tcp.gets
