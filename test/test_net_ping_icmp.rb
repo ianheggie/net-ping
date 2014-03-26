@@ -42,7 +42,7 @@ class TC_PingICMP < Test::Unit::TestCase
 
   test "icmp ping of local host is successful" do
     assert_true(Net::Ping::ICMP.new(@host).ping?)
-    assert_true(Net::Ping::ICMP.new('192.168.0.1').ping?)
+    assert_true(Net::Ping::ICMP.new('127.0.0.1').ping?)
   end
 
   test "ping? is an alias for ping" do
@@ -79,8 +79,8 @@ class TC_PingICMP < Test::Unit::TestCase
 
   test "host setter method basic functionality" do
     assert_respond_to(@icmp, :host=)
-    assert_nothing_raised{ @icmp.host = '192.168.0.1' }
-    assert_equal(@icmp.host, '192.168.0.1')
+    assert_nothing_raised{ @icmp.host = '127.0.0.1' }
+    assert_equal(@icmp.host, '127.0.0.1')
   end
 
   test "port method basic functionality" do
