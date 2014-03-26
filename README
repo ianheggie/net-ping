@@ -17,7 +17,7 @@
   attention to the documentation pertaining to ECONNREFUSED and TCP pings.
 
   Also note the documentation regarding down hosts.
-   
+
   You do not need win32-open3 with Ruby 1.9.x. The open3 library that ships
   as part of the Ruby standard library should work.
 
@@ -34,18 +34,28 @@
   The former has the advantage of being easier to remember and all inclusive,
   not to mention backwards compatible. The latter has the advantage of
   reducing your memory footprint.
-   
+
 == Known Issues
+
+  **UDP**
   Older versions of Ruby 1.9.x may not work with UDP pings.
 
   Older versions of JRuby will return false positives in UDP pings
   because of an incorrect error class being raised. See JRuby-4896.
 
+  Jruby hangs if UDP ping doesn't receive a return packet. See JRuby-6974.
+
+  **External**
   JRuby 1.6.7 or later is required for external pings because of a bug
   in earlier versions with open3 and stream handling.
 
+  **ICMP**
+  ICMP pings are not supported by JRuby or Rubinus. See JRuby-5897
   ICMP pings are not thread safe. See https://www.ruby-forum.com/topic/146116.
   Patches welcome.
+
+  **TCP**
+  TCP pings are not supported under JRuby: they fail with Errno::ECONNREFUSED.
 
 == License
   Artistic 2.0
@@ -55,7 +65,7 @@
   setup a gittip if used by your company professionally.
 
   http://www.gittip.com/djberg96/
-   
+
 == More documentation
   If you installed this library via Rubygems, you can view the inline
   documentation via ri or fire up 'gem server', and point your browser at
