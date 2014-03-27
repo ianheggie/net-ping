@@ -13,10 +13,12 @@ require 'net/ping/external'
 
 class TC_Net_Ping_External < Test::Unit::TestCase
   def setup
-    @host  = 'localhost'
-    @bogus = 'foo.bar.baz'
-    @pe    = Net::Ping::External.new(@host)
-    @bad   = Net::Ping::External.new(@bogus)
+    @host        = 'localhost'
+    @bogus       = 'foo.bar.baz'
+    @bcast_ip    = '10.0.0.0'
+    @pe          = Net::Ping::External.new(@host)
+    @bad         = Net::Ping::External.new(@bogus)
+    @unreachable = Net::Ping::External.new(@bcast_ip)
   end
 
   test "ping basic functionality" do
@@ -120,10 +122,21 @@ class TC_Net_Ping_External < Test::Unit::TestCase
     assert_nil(@pe.warning)
   end
 
+  test "pinging an unreachable host returns after the timeout" do
+    @unreachable.timeout = 1
+    tolerance = 0.5
+    start_time = Time.now
+    @unreachable.ping
+    elapsed = Time.now - start_time
+    assert_true(elapsed < @bad.timeout + tolerance)
+  end
+
   def teardown
-    @host  = nil
-    @bogus = nil
-    @pe    = nil
-    @bad   = nil
+    @host        = nil
+    @bogus       = nil
+    @bcast_ip    = nil
+    @pe          = nil
+    @bad         = nil
+    @unreachable = nil
   end
 end
