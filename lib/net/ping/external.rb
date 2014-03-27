@@ -32,7 +32,7 @@ module Net
         when /hpux/i
           pcmd += [host, '-n1']
         when /win32|windows|msdos|mswin|cygwin|mingw/i
-          pcmd += ['-n', '1', host]
+          pcmd += ['-n', '1', '-w', (1000 * @timeout).to_i.to_s, host]
         else
           pcmd += [host]
       end
@@ -40,7 +40,11 @@ module Net
       start_time = Time.now
 
       begin
-        exit_code, err = run_with_timeout(*pcmd)
+        if File::ALT_SEPARATOR
+          exit_code, err = run_no_timeout(*pcmd)
+        else
+          exit_code, err = run_with_timeout(*pcmd)
+        end
         case exit_code
         when 0
           bool = true  # Success, at least one response.
@@ -87,11 +91,7 @@ module Net
 
         while (Time.now - start) < timeout and thread.alive?
           begin
-            if File::ALT_SEPARATOR
-              err = stderr.read(ERR_MSG_SIZE)
-            else
-              err = stderr.read_nonblock(ERR_MSG_SIZE)
-            end
+            err = stderr.read_nonblock(ERR_MSG_SIZE)
           rescue IO::WaitReadable
             IO.select([stderr], nil, nil, @timeout)
             next
@@ -119,6 +119,24 @@ module Net
         stderr.close if stderr
       end
       err ||= ''
+      return [exit_code, err]
+    end
+
+    # Runs a command without a timeout. The returned value
+    # is a list of the form
+    #
+    #   [exit_code, err]
+    #
+    def run_no_timeout(*command)
+      out, err, exit_code = Open3.capture3(*command)
+      if exit_code != 0 and (err.nil? or err.empty?)
+        out.each_line do |line|
+          if line =~ /(timed out|could not find host)/i
+            err = line
+            break
+          end
+        end
+      end
       return [exit_code, err]
     end
 
