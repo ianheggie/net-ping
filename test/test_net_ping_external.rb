@@ -128,7 +128,7 @@ class TC_Net_Ping_External < Test::Unit::TestCase
     start_time = Time.now
     @unreachable.ping
     elapsed = Time.now - start_time
-    assert_true(elapsed < @bad.timeout + tolerance)
+    assert_true(elapsed < @unreachable.timeout + tolerance)
   end
 
   def teardown
