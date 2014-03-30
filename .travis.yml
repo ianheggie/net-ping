@@ -8,26 +8,39 @@ before_install:
 - gem --version
 - gem install bundler
 - bundle --version
+- bash test/setup_ubuntu.bash
 bundler_args: --binstubs
-script: rvmsudo_secure_path=1 rvmsudo EXCLUDE=$EXCLUDE bin/rake test
-rvm:
-- 1.9.2
-- 1.9.3
-- 2.0.0
-- 2.1.0
-- ruby-head
+script: rvmsudo_secure_path=1 rvmsudo UNREACHABLE_HOST=192.0.2.1 UNREACHABLE_ROUTE=192.0.2.2 EXCLUDE=$EXCLUDE bin/rake test
 matrix:
   include:
+    - rvm: 1.9.2
+      env: EXCLUDE=HTTP_PING_DOES_NOT_WAITS_FOR_RESPONSE_BUG,ICMP_ENETUNREACH_BUG,TCP_UNREACHABLE_ROUTE_BUG,TCP_SERVICE_CHECK_UNUSED_PORT_BUG
+    - rvm: 1.9.3
+      env: EXCLUDE=ICMP_ENETUNREACH_BUG,TCP_UNREACHABLE_ROUTE_BUG,TCP_SERVICE_CHECK_UNUSED_PORT_BUG
+    - rvm: 2.0.0
+      env: EXCLUDE=ICMP_ENETUNREACH_BUG,TCP_UNREACHABLE_ROUTE_BUG,TCP_SERVICE_CHECK_UNUSED_PORT_BUG
+    - rvm: 2.1.0
+      env: EXCLUDE=ICMP_ENETUNREACH_BUG,TCP_UNREACHABLE_ROUTE_BUG,TCP_SERVICE_CHECK_UNUSED_PORT_BUG
     # https://jira.codehaus.org/browse/JRUBY-5897 - jruby doesn't support raw sockets
     # jruby timeout doesn't work with udp sockets
     # jruby: tcp tests failing with Errno::ECONNREFUSED to localhost port 22
-    - rvm: jruby-head
-      env: TESTOPTS=-v EXCLUDE=udp,icmp,tcp
-    - rvm: rbx
-      env: EXCLUDE=icmp
-  allow_failures:
-    - rvm: rbx
-    - rvm: jruby-head
+    - rvm: jruby-19mode
+      env: EXCLUDE=udp,icmp,tcp,HTTP_PING_DOES_NOT_TIMEOUT_BUG,TCP_UNREACHABLE_ROUTE_BUG,TCP_SERVICE_CHECK_UNUSED_PORT_BUG
+    - rvm: rbx-2.2.6
+      env: EXCLUDE=icmp,TCP_UNREACHABLE_ROUTE_BUG,TCP_SERVICE_CHECK_UNUSED_PORT_BUG
+    # show bugs
     - rvm: ruby-head
+      env: TESTOPTS=-v
+    # upcoming releases
+    - rvm: ruby-head
+      env: TESTOPTS=-v EXCLUDE=ICMP_ENETUNREACH_BUG,TCP_UNREACHABLE_ROUTE_BUG,TCP_SERVICE_CHECK_UNUSED_PORT_BUG
+    - rvm: rbx
+      env: TESTOPTS=-v EXCLUDE=icmp,TCP_UNREACHABLE_ROUTE_BUG,TCP_SERVICE_CHECK_UNUSED_PORT_BUG
+    - rvm: jruby-head
+      env: TESTOPTS=-v EXCLUDE=udp,icmp,tcp,TCP_UNREACHABLE_ROUTE_BUG,TCP_SERVICE_CHECK_UNUSED_PORT_BUG
+  allow_failures:
+    - rvm: ruby-head
+    - rvm: ruby-head
+    - rvm: rbx
+    - rvm: jruby-head
 
-# Updated to trigger a build

@@ -10,15 +10,17 @@
 #########################################################################
 require 'test-unit'
 require 'net/ping/external'
+require File.expand_path('../test_helper.rb', __FILE__)
 
 class TC_Net_Ping_External < Test::Unit::TestCase
   def setup
     @host        = 'localhost'
     @bogus       = 'foo.bar.baz'
-    @bcast_ip    = '10.0.0.0'
     @pe          = Net::Ping::External.new(@host)
     @bad         = Net::Ping::External.new(@bogus)
-    @unreachable = Net::Ping::External.new(@bcast_ip)
+    @blackhole         = Net::Ping::External.new(TestHelper.blackhole_ip)
+    @unreachable_host  = TestHelper.unreachable_host && Net::Ping::External.new(TestHelper.unreachable_host)
+    @unreachable_route = TestHelper.unreachable_route && Net::Ping::External.new(TestHelper.unreachable_route)
   end
 
   test "ping basic functionality" do
@@ -122,14 +124,69 @@ class TC_Net_Ping_External < Test::Unit::TestCase
     assert_nil(@pe.warning)
   end
 
+  test 'ping should fail for an unreachable website' do
+    omit_unless(@unreachable_host)
+    @unreachable_host.timeout = 3
+    assert_false(@unreachable_host.ping?)
+  end
+
+  test 'ping should fail for a website on an unreachable route' do
+    omit_unless(@unreachable_route)
+    @unreachable_route.timeout = 3
+    assert_false(@unreachable_route.ping?)
+  end
+
+  test 'ping should fail for a black hole' do
+    @blackhole.timeout = 3
+    assert_false(@blackhole.ping?)
+  end
+
   test "pinging an unreachable host returns after the timeout" do
-    @unreachable.timeout = 1
+    omit_unless(@unreachable_host)
+    @unreachable_host.timeout = 1
     tolerance = 0.5
     start_time = Time.now
-    @unreachable.ping
+    res = @unreachable_host.ping
     elapsed = Time.now - start_time
-    assert_true(elapsed < @unreachable.timeout + tolerance)
+    assert_true(elapsed < @unreachable_host.timeout + tolerance,
+                'Expected elapsed (%1.1f) to be < timeout (%d) + tolerance (%1.1f), ping = %s, exception = %s' %
+                    [elapsed, @unreachable_host.timeout, tolerance, res, @unreachable_host.exception.inspect])
   end
+
+  test "pinging a host on an unreacable network returns after the timeout" do
+    omit_unless(@unreachable_route)
+    @unreachable_route.timeout = 1
+    tolerance = 0.5
+    start_time = Time.now
+    res = @unreachable_route.ping
+    elapsed = Time.now - start_time
+    assert_true(elapsed < @unreachable_route.timeout + tolerance,
+                'Expected elapsed (%1.1f) to be < timeout (%d) + tolerance (%1.1f), ping = %s, exception = %s' %
+                    [elapsed, @unreachable_route.timeout, tolerance, res, @unreachable_route.exception.inspect])
+  end
+
+  test "pinging a blackhole returns after the timeout" do
+    @blackhole.timeout = 1
+    tolerance = 0.5
+    start_time = Time.now
+    res = @blackhole.ping
+    elapsed = Time.now - start_time
+    assert_true(elapsed < @blackhole.timeout + tolerance,
+                'Expected elapsed (%1.1f) to be < timeout (%d) + tolerance (%1.1f), ping = %s, exception = %s' %
+                    [elapsed, @blackhole.timeout, tolerance, res, @blackhole.exception.inspect])
+  end
+
+  test "pinging a blackhole waits for timeout" do
+    @blackhole.timeout = 3
+    tolerance = 0.5
+    start_time = Time.now
+    res = @blackhole.ping
+    elapsed = Time.now - start_time
+    assert_true(elapsed > @blackhole.timeout - tolerance,
+                'Expected elapsed (%1.1f) to be > timeout (%d) - tolerance (%1.1f), ping = %s, exception = %s' %
+                    [elapsed, @blackhole.timeout, tolerance, res, @blackhole.exception.inspect])
+  end
+
 
   def teardown
     @host        = nil
