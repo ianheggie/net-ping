@@ -25,14 +25,17 @@ module Net
       bool = false
 
       case RbConfig::CONFIG['host_os']
-        when /linux|bsd|osx|mach|darwin/i
-          pcmd += ['-c1', host]
+        when /linux/i
+          pcmd += ['-c', '1', '-W', @timeout.to_s, host]
+        when /bsd|osx|mach|darwin/i
+          pcmd += ['-c', '1', '-t', @timeout.to_s, host]
         when /solaris|sunos/i
-          pcmd += [host, '1']
+          pcmd += [host, @timeout.to_s]
         when /hpux/i
-          pcmd += [host, '-n1']
+          pcmd += [host, '-n1', '-m', @timeout.to_s]
         when /win32|windows|msdos|mswin|cygwin|mingw/i
-          pcmd += ['-n', '1', '-w', (1000 * @timeout).to_i.to_s, host]
+          #pcmd += ['-n', '1', '-w', (1000 * @timeout).to_i.to_s, host]
+          pcmd += ['-n', '1', '-w', (@timeout * 1000).to_s, host]
         else
           pcmd += [host]
       end
@@ -40,23 +43,33 @@ module Net
       start_time = Time.now
 
       begin
-        if File::ALT_SEPARATOR
-          exit_code, err = run_no_timeout(*pcmd)
-        else
-          exit_code, err = run_with_timeout(*pcmd)
-        end
-        case exit_code
-        when 0
-          bool = true  # Success, at least one response.
-          if err and err =~ /warning/i
-            @warning = err.chomp
+        err = nil
+
+        Open3.popen3(*pcmd) do |stdin, stdout, stderr, thread|
+          err = stderr.gets # Can't chomp yet, might be nil
+
+          case thread.value.exitstatus
+            when 0
+              bool = true  # Success, at least one response.
+              if err & err =~ /warning/i
+                @warning = err.chomp
+              end
+            when 2
+              bool = false # Transmission successful, no response.
+              @exception = err.chomp if err
+            else
+              bool = false # An error occurred
+              if err
+                @exception = err.chomp
+              else
+                stdout.each_line do |line|
+                  if line =~ /(timed out|could not find host|packet loss)/i
+                    @exception = line.chomp
+                    break
+                  end
+                end
+              end
           end
-        when 2
-          bool = false # Transmission successful, no response.
-          @exception = err.chomp
-        else
-          bool = false # An error occurred
-          @exception = err.chomp
         end
       rescue Exception => error
         @exception = error.message

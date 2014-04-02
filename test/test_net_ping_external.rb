@@ -187,6 +187,14 @@ class TC_Net_Ping_External < Test::Unit::TestCase
                     [elapsed, @blackhole.timeout, tolerance, res, @blackhole.exception.inspect])
   end
 
+  test "timing out causes expected result" do
+    ext = Net::Ping::External.new('foo.bar.baz', nil, 1)
+    start = Time.now
+    assert_false(ext.ping?)
+    elapsed = Time.now - start
+    assert_true(elapsed < 2.5, "Actual elapsed: #{elapsed}")
+    assert_not_nil(ext.exception)
+  end
 
   def teardown
     @host        = nil
