@@ -177,6 +177,7 @@ class TC_Net_Ping_External < Test::Unit::TestCase
   end
 
   test "pinging a blackhole waits for timeout" do
+    # sanity check that it is a black hole we are testing
     @blackhole.timeout = 3
     tolerance = 0.5
     start_time = Time.now

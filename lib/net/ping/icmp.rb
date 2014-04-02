@@ -104,7 +104,14 @@ module Net
 
       start_time = Time.now
 
-      socket.send(msg, 0, saddr) # Send the message
+      begin
+        socket.send(msg, 0, saddr) # Send the message
+      rescue Errno::ENETUNREACH => err
+        # rescue from unreachable host or network
+        @exception = err
+        socket.close if socket
+        return bool
+      end
 
       begin
         Timeout.timeout(@timeout){
