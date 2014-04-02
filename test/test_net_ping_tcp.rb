@@ -116,7 +116,7 @@ class TC_PingTCP < Test::Unit::TestCase
   end
 
   test 'ping should fail for a website on an unreachable route' do
-    omit_unless(@unreachable_route && ENV['EXCLUDE'].to_s !~ /TCP_UNREACHABLE_ROUTE_BUG/)
+    omit_unless(@unreachable_route)
     @unreachable_route.timeout = 3
     assert_false(@unreachable_route.ping?)
   end
