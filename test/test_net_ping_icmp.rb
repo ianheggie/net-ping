@@ -169,19 +169,8 @@ class TC_PingICMP < Test::Unit::TestCase
                     [elapsed, @unreachable_host.timeout, tolerance, res, @unreachable_host.exception.inspect])
   end
 
-  test "pinging an unreachable host waits for timeout" do
-    omit_unless(@unreachable_host)
-    @unreachable_host.timeout = 3
-    tolerance = 0.5
-    start_time = Time.now
-    res = @unreachable_host.ping
-    elapsed = Time.now - start_time
-    assert_true(elapsed > @unreachable_host.timeout - tolerance,
-                'Expected elapsed (%1.1f) to be > timeout (%d) - tolerance (%1.1f), ping = %s, exception = %s' %
-                    [elapsed, @unreachable_host.timeout, tolerance, res, @unreachable_host.exception.inspect])
-  end
 
-  test "pinging a host on an unreacable network returns after the timeout" do
+  test "pinging a host on an unreachable network returns after the timeout" do
     omit_unless(@unreachable_route)
     @unreachable_route.timeout = 1
     tolerance = 0.5
@@ -193,17 +182,6 @@ class TC_PingICMP < Test::Unit::TestCase
                     [elapsed, @unreachable_route.timeout, tolerance, res, @unreachable_route.exception.inspect])
   end
 
-  test "pinging a host on an unreacable network waits for timeout" do
-    omit_unless(@unreachable_route)
-    @unreachable_route.timeout = 3
-    tolerance = 0.5
-    start_time = Time.now
-    res = @unreachable_route.ping
-    elapsed = Time.now - start_time
-    assert_true(elapsed > @unreachable_route.timeout - tolerance,
-                'Expected elapsed (%1.1f) to be > timeout (%d) - tolerance (%1.1f), ping = %s, exception = %s' %
-                    [elapsed, @unreachable_route.timeout, tolerance, res, @unreachable_route.exception.inspect])
-  end
 
   test "pinging a blackhole returns after the timeout" do
     @blackhole.timeout = 1

@@ -11,16 +11,16 @@ class TestHelper
     (ENV['LOCAL_TCP_PORT'] || 22).to_i
   end
 
-  def self.local_udp_port
-    ENV['LOCAL_UDP_PORT'].to_i if ENV['LOCAL_UDP_PORT']
-  end
+  #def self.local_udp_port
+  #  ENV['LOCAL_UDP_PORT'].to_i if ENV['LOCAL_UDP_PORT']
+  #end
 
   def self.unreachable_host
-    ENV['UNREACHABLE_HOST']
+    ENV['UNREACHABLE_HOST'] != '' && ENV['UNREACHABLE_HOST']
   end
 
   def self.unreachable_route
-    ENV['UNREACHABLE_ROUTE']
+    ENV['UNREACHABLE_ROUTE'] != '' && ENV['UNREACHABLE_ROUTE']
   end
 
   def self.blackhole_ip
