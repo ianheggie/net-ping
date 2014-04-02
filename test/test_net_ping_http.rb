@@ -199,7 +199,6 @@ class TC_Net_Ping_HTTP < Test::Unit::TestCase
   end
 
   test "pinging a slow host waits for timeout" do
-    omit_if(ENV['EXCLUDE'].to_s =~ /HTTP_PING_DOES_NOT_WAITS_FOR_RESPONSE_BUG/, 'HTTP_PING_DOES_NOT_WAITS_FOR_RESPONSE_BUG excluded')
     echo_process, port = slow_server
     slow = Net::Ping::HTTP.new('http://127.0.0.1/', port)
     slow.timeout = 3
