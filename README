@@ -18,7 +18,6 @@
   attention to the documentation pertaining to ECONNREFUSED and TCP pings.
 
   Also note the documentation regarding down hosts.
-
 == How to require net-ping
   You can do either this:
 
