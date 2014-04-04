@@ -3,7 +3,7 @@ require 'rbconfig'
 
 Gem::Specification.new do |spec|
   spec.name      = 'net-ping'
-  spec.version   = '1.6.0'
+  spec.version   = '1.7.3'
   spec.license   = 'Artistic 2.0'
   spec.author    = 'Daniel J. Berger'
   spec.email     = 'djberg96@gmail.com'
@@ -12,25 +12,23 @@ Gem::Specification.new do |spec|
   spec.test_file = 'test/test_net_ping.rb'
   spec.files     = Dir['**/*'].reject{ |f| f.include?('git') }
 
-  spec.rubyforge_project = 'shards'
   spec.extra_rdoc_files  = ['README', 'CHANGES', 'doc/ping.txt']
 
-  spec.add_dependency('ffi', '>= 1.0.0')
+  # The TCP Ping class requires this for non-blocking sockets.
+  spec.required_ruby_version = ">= 1.9.3"
 
-  spec.add_development_dependency('test-unit', '>= 2.5.0')
-  spec.add_development_dependency('fakeweb', '>= 1.3.0')
+  spec.add_development_dependency('test-unit')
+  spec.add_development_dependency('fakeweb')
+  spec.add_development_dependency('rake')
 
-  if File::ALT_SEPARATOR && RUBY_PLATFORM != 'java'
-    spec.platform = Gem::Platform::CURRENT
-    spec.platform.cpu = 'universal'
+  if File::ALT_SEPARATOR
+    require 'rbconfig'
+    arch = RbConfig::CONFIG['build_os']
+    spec.platform = Gem::Platform.new(['universal', arch])
     spec.platform.version = nil
 
-    # Used primarily for icmp pings.
-    spec.add_development_dependency('win32-security', '>= 0.2.0')
-
-    if RUBY_VERSION.to_f < 1.9
-      spec.add_dependency('win32-open3', '>= 0.3.1')
-    end
+    # Used for icmp pings.
+    spec.add_dependency('win32-security', '>= 0.2.0')
   end
 
   spec.description = <<-EOF

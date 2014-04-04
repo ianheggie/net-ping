@@ -1,13 +1,7 @@
-require 'ffi'
+require 'open3'
 require 'rbconfig'
 
 require File.join(File.dirname(__FILE__), 'ping')
-
-if File::ALT_SEPARATOR && RUBY_VERSION.to_f < 1.9 && RUBY_PLATFORM != 'java'
-  require 'win32/open3'
-else
-  require 'open3'
-end
 
 # The Net module serves as a namespace only.
 module Net
@@ -15,13 +9,7 @@ module Net
   # The Ping::External class encapsulates methods for external (system) pings.
   class Ping::External < Ping
 
-    if File::ALT_SEPARATOR
-      extend FFI::Library
-      ffi_lib 'kernel32'
-
-      attach_function :SetConsoleCP, [:uint], :bool
-      attach_function :GetConsoleCP, [], :uint
-    end
+    ERR_MSG_SIZE = 4096
 
     # Pings the host using your system's ping utility and checks for any
     # errors or warnings. Returns true if successful, or false if not.
@@ -33,24 +21,25 @@ module Net
     def ping(host = @host)
       super(host)
 
-      stdin = stdout = stderr = nil
-      pstring = "ping "
-      bool    = false
-      orig_cp = nil
+      pcmd = ['ping']
+      bool = false
 
       case RbConfig::CONFIG['host_os']
-        when /linux|bsd|osx|mach|darwin/i
-          pstring += "-c 1 #{host}"
+        when /linux/i
+          pcmd += ['-c', '1', '-W', @timeout.to_s, host]
+        when /aix/i
+          pcmd += ['-c', '1', '-w', @timeout.to_s, host]
+        when /bsd|osx|mach|darwin/i
+          pcmd += ['-c', '1', '-t', @timeout.to_s, host]
         when /solaris|sunos/i
-          pstring += "#{host} 1"
+          pcmd += [host, @timeout.to_s]
         when /hpux/i
-          pstring += "#{host} -n 1"
+          pcmd += [host, '-n1', '-m', @timeout.to_s]
         when /win32|windows|msdos|mswin|cygwin|mingw/i
-          orig_cp = GetConsoleCP()
-          SetConsoleCP(437) if orig_cp != 437 # United States
-          pstring += "-n 1 #{host}"
+          #pcmd += ['-n', '1', '-w', (1000 * @timeout).to_i.to_s, host]
+          pcmd += ['-n', '1', '-w', (@timeout * 1000).to_s, host]
         else
-          pstring += "#{host}"
+          pcmd += [host]
       end
 
       start_time = Time.now
@@ -58,62 +47,113 @@ module Net
       begin
         err = nil
 
-        Timeout.timeout(@timeout){
-          stdin, stdout, stderr = Open3.popen3(pstring)
+        Open3.popen3(*pcmd) do |stdin, stdout, stderr, thread|
+          stdin.close
           err = stderr.gets # Can't chomp yet, might be nil
-        }
 
-        stdin.close
-        stderr.close
-
-        if File::ALT_SEPARATOR && GetConsoleCP() != orig_cp
-          SetConsoleCP(orig_cp)
-        end
-
-        unless err.nil?
-          if err =~ /warning/i
-            @warning = err.chomp
-            bool = true
-          else
-            @exception = err.chomp
-          end
-        # The "no answer" response goes to stdout, not stderr, so check it
-        else
-          lines = stdout.readlines
-          stdout.close
-          if lines.nil? || lines.empty?
-            bool = true
-          else
-            regexp = /
-              no\ answer|
-              host\ unreachable|
-              could\ not\ find\ host|
-              request\ timed\ out|
-              100%\ packet\ loss
-            /ix
-
-            lines.each{ |line|
-              if regexp.match(line)
-                @exception = line.chomp
-                break
+          case thread.value.exitstatus
+            when 0
+              bool = true  # Success, at least one response.
+              if err & err =~ /warning/i
+                @warning = err.chomp
               end
-            }
-
-            bool = true unless @exception
+            when 2
+              bool = false # Transmission successful, no response.
+              @exception = err.chomp if err
+            else
+              bool = false # An error occurred
+              if err
+                @exception = err.chomp
+              else
+                stdout.each_line do |line|
+                  if line =~ /(timed out|could not find host|packet loss)/i
+                    @exception = line.chomp
+                    break
+                  end
+                end
+              end
           end
         end
       rescue Exception => error
         @exception = error.message
-      ensure
-        stdin.close  if stdin  && !stdin.closed?
-        stdout.close if stdout && !stdout.closed?
-        stderr.close if stderr && !stderr.closed?
       end
 
       # There is no duration if the ping failed
       @duration = Time.now - start_time if bool
 
       bool
+    end
+
+    # Runs a specified shell command in a separate thread.
+    # If it exceeds the given timeout in seconds, kills it.
+    # Returns a list of the form
+    #
+    #   [exit_code, err]
+    #
+    # which contains any output sent by the command to stderr as a String.
+    # Uses Kernel.select to wait up to the timeout length (in seconds)
+    # before killing the process spawned by Open3.
+    #
+    def run_with_timeout(*command)
+      err = nil
+      exit_code = nil
+
+      begin
+        # Start task in another thread, which spawns a process
+        stdin, stdout, stderr, thread = Open3.popen3(*command)
+        # Get the pid of the spawned process
+        pid = thread[:pid]
+        start = Time.now
+
+        while (Time.now - start) < timeout and thread.alive?
+          begin
+            err = stderr.read_nonblock(ERR_MSG_SIZE)
+          rescue IO::WaitReadable
+            IO.select([stderr], nil, nil, @timeout)
+            next
+          rescue EOFError
+            # Command has completed, not really an error...
+            break
+          end
+        end
+
+        if thread.alive?
+          # We need to kill the process, because killing the thread leaves
+          # the process alive but detached, annoyingly enough.
+          begin
+            Process.kill("TERM", pid)
+            err = "execution expired"
+          rescue Errno::ESRCH
+            # The process already exited, ignoring
+          end
+        end
+        # Join the thread and get its exit status
+        exit_code = thread.value.exitstatus
+      ensure
+        stdin.close if stdin
+        stdout.close if stdout
+        stderr.close if stderr
+      end
+      err ||= ''
+      return [exit_code, err]
+    end
+
+    # Runs a command without a timeout. The returned value
+    # is a list of the form
+    #
+    #   [exit_code, err]
+    #
+    def run_no_timeout(*command)
+      out, err, exit_code = Open3.capture3(*command)
+      if exit_code != 0 and (err.nil? or err.empty?)
+        out.each_line do |line|
+          if line =~ /(timed out|could not find host)/i
+            err = line
+            break
+          end
+        end
+      end
+      return [exit_code, err]
     end
 
     alias ping? ping

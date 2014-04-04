@@ -1,3 +1,58 @@
+== 1.7.3 - 3-Apr-2014
+* Removed the Timeout block for the Ping::External class as it apparently
+  hasn't worked with open3 for some time. Instead, it now uses your command
+  line ping's timeout switch. Thanks go to Andrea Bernardo Ciddio for the
+  spot.
+* Made ICMP pings thread safe. I think.
+* Removed a redundant Timeout block in the Ping::ICMP class.
+* If an ICMP ping times out, the exception attribute is set to "timeout".
+* Added explicit support for AIX for the Ping::External class.
+* Bumped minimum required Ruby version to 1.9.3.
+
+== 1.7.2 - 21-Jan-2014
+* Fixed a bug in the Ping::HTTP constructor where it was not honoring the
+  port if provided as the second argument. Thanks go to Florian Anderiasch
+  for the spot.
+* Removed win32-open3 require in the Ping::External class since it isn't
+  needed in Ruby 1.9.x or later.
+* Refactored the Ping::External class so that it checks the exit status rather
+  than try to parse output. Thanks go to Miguel Tubia for the suggestion.
+* Dropped explicit support for Windows XP.
+* Removed reference to win32-open3 in README.
+
+== 1.7.1 - 26-Sep-2013
+* Fixed a bug in the Ping::TCP class where it could return nil instead
+  of false. Thanks go to Grandy Nguyen for the patch.
+
+== 1.7.0 - 25-Aug-2013
+* Now requires Ruby 1.9.x or later.
+* Replaced the main ping code for the Ping::TCP class. The timeout module
+  really doesn't work very well with sockets, and so a raw socket approach
+  combined with IO.select is now used instead.
+* Updates to the doc/ping.txt file.
+
+== 1.6.2 - 8-Aug-2013
+* Fixed a bug in the ICMP ping helper module. Thanks go to Yuichi
+  Tsunematsu for the spot.
+* The win32-security library is not just a development dependency. Thanks
+  again go to Yuichi Tsunematsu for the spot.
+* Updated the icmp ping tests.
+* Updated the gemspec for MS Windows.
+
+== 1.6.1 - 17-Jul-2013
+* Automatically set the scheme to "http" if not present when performing
+  HTTP pings. See https://bugs.ruby-lang.org/issues/8645 for an issue
+  with the uri library that led to this change. Thanks go to Preston Lee
+  for the spot.
+* Removed the windows/system_info dependency, since it added other
+  dependencies just to check the Windows version. Instead, I added a
+  helper file that adds some needed Windows functions using FFI.
+* Added Rake as a development dependency and updated the Gemfile
+  source because Bundler. Thanks to Jean-Philippe Doyle for the patches.
+* Added some warning text to the Net::Ping::External tests for users
+  who are using OpenDNS. In short, you will probably get test failures
+  and surprising true results for bad hosts.
+
 == 1.6.0 - 19-Mar-2013
 * Split out the ldap portion of the code into its own branch.
 * Don't require resolv-replace on Ruby 1.9.3 or later.

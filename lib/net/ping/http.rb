@@ -41,6 +41,10 @@ module Net
 
     attr_accessor :response
 
+    # For unsuccessful requests that return a server error, it is
+    # useful to know the HTTP status code of the response.
+    attr_reader :code
+
     # Creates and returns a new Ping::HTTP object. The default port is the
     # port associated with the URI. The default timeout is 5 seconds.
     #
@@ -49,6 +53,7 @@ module Net
       @redirect_limit  = 5
       @ssl_verify_mode = OpenSSL::SSL::VERIFY_NONE
       @get_request     = false
+      @code            = nil
 
       port ||= URI.parse(uri).port if uri
 
@@ -68,15 +73,24 @@ module Net
     # response is considered a failed ping.
     #
     # If no file or path is specified in the URI, then '/' is assumed.
+    # If no scheme is present in the URI, then 'http' is assumed.
     #
     def ping(host = @host)
       super(host)
       bool = false
-      uri  = URI.parse(host)
+
+      # See https://bugs.ruby-lang.org/issues/8645
+      host = "http://#{host}" unless host.include?("http")
+
+      uri = URI.parse(host)
+
+      # A port provided here overrides anything provided in constructor
+      port = URI.split(host)[3] || @port
+      port = port.to_i
 
       start_time = Time.now
 
-      self.response = do_ping(uri)
+      self.response = do_ping(uri, port)
 
       if self.response.is_a?(Net::HTTPSuccess)
         bool = true
@@ -92,7 +106,7 @@ module Net
             end
             redirect = URI.parse(self.response['location'])
             redirect = uri + redirect if redirect.relative?
-            self.response = do_ping(redirect)
+            self.response = do_ping(redirect, port)
             rlimit   += 1
           end
 
@@ -128,7 +142,7 @@ module Net
       self.response && self.response.code.to_i >= 300 && self.response.code.to_i < 400
     end
 
-    def do_ping(uri)
+    def do_ping(uri, port)
       response = nil
       proxy    = uri.find_proxy || URI.parse("")
       begin
@@ -136,7 +150,7 @@ module Net
         headers  = { }
         headers["User-Agent"] = user_agent unless user_agent.nil?
         Timeout.timeout(@timeout) do
-          http = Net::HTTP::Proxy(proxy.host, proxy.port, proxy.user, proxy.password).new(uri.host, uri.port)
+          http = Net::HTTP::Proxy(proxy.host, proxy.port, proxy.user, proxy.password).new(uri.host, port)
           @proxied = http.proxy?
           if @get_request == true
             request = Net::HTTP::Get.new(uri_path)
@@ -154,6 +168,7 @@ module Net
       rescue Exception => err
         @exception = err.message
       end
+      @code = response.code if response
       response
     end
   end

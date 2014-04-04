@@ -2,8 +2,6 @@ require File.join(File.dirname(__FILE__), 'ping')
 
 if File::ALT_SEPARATOR
   require 'win32/security'
-  require 'windows/system_info'
-  include Windows::SystemInfo
 end
 
 # The Net module serves as a namespace only.
@@ -32,7 +30,7 @@ module Net
     def initialize(host=nil, port=nil, timeout=5)
       raise 'requires root privileges' if Process.euid > 0
 
-      if File::ALT_SEPARATOR && windows_version >= 6
+      if File::ALT_SEPARATOR
         unless Win32::Security.elevated_security?
           raise 'requires elevated security'
         end
@@ -46,7 +44,7 @@ module Net
 
       0.upto(@data_size){ |n| @data << (n % 256).chr }
 
-      @pid  = Process.pid & 0xffff
+      @ping_id = (Thread.current.object_id ^ Process.pid) & 0xffff
 
       super(host, port, timeout)
       @port = nil # This value is not used in ICMP pings.
@@ -61,7 +59,7 @@ module Net
     end
 
     # Associates the local end of the socket connection with the given
-    # +host+ and +port+.  The default port is 0.
+    # +host+ and +port+. The default port is 0.
     #
     def bind(host, port = 0)
       @bind_host = host
@@ -92,10 +90,10 @@ module Net
       timeout = @timeout
 
       checksum = 0
-      msg = [ICMP_ECHO, ICMP_SUBCODE, checksum, @pid, @seq, @data].pack(pstring)
+      msg = [ICMP_ECHO, ICMP_SUBCODE, checksum, @ping_id, @seq, @data].pack(pstring)
 
       checksum = checksum(msg)
-      msg = [ICMP_ECHO, ICMP_SUBCODE, checksum, @pid, @seq, @data].pack(pstring)
+      msg = [ICMP_ECHO, ICMP_SUBCODE, checksum, @ping_id, @seq, @data].pack(pstring)
 
       begin
         saddr = Socket.pack_sockaddr_in(0, host)
@@ -106,40 +104,46 @@ module Net
 
       start_time = Time.now
 
-      socket.send(msg, 0, saddr) # Send the message
+      begin
+        socket.send(msg, 0, saddr) # Send the message
+      rescue Errno::ENETUNREACH => err
+        # rescue from unreachable host or network
+        @exception = err
+        socket.close if socket
+        return bool
+      end
 
       begin
-        Timeout.timeout(@timeout){
-          while true
-            io_array = select([socket], nil, nil, timeout)
+        while true
+          io_array = select([socket], nil, nil, timeout)
 
-            if io_array.nil? || io_array[0].empty?
-              return false
-            end
-
-            pid = nil
-            seq = nil
-
-            data = socket.recvfrom(1500).first
-            type = data[20, 2].unpack('C2').first
-
-            case type
-              when ICMP_ECHOREPLY
-                if data.length >= 28
-                  pid, seq = data[24, 4].unpack('n3')
-                end
-              else
-                if data.length > 56
-                  pid, seq = data[52, 4].unpack('n3')
-                end
-            end
-
-            if pid == @pid && seq == @seq && type == ICMP_ECHOREPLY
-              bool = true
-              break
-            end
+          if io_array.nil? || io_array[0].empty?
+            @exception = "timeout" if io_array.nil?
+            return false
           end
-        }
+
+          ping_id = nil
+          seq = nil
+
+          data = socket.recvfrom(1500).first
+          type = data[20, 2].unpack('C2').first
+
+          case type
+            when ICMP_ECHOREPLY
+              if data.length >= 28
+                ping_id, seq = data[24, 4].unpack('n3')
+              end
+            else
+              if data.length > 56
+                ping_id, seq = data[52, 4].unpack('n3')
+              end
+          end
+
+          if ping_id == @ping_id && seq == @seq && type == ICMP_ECHOREPLY
+            bool = true
+            break
+          end
+        end
       rescue Exception => err
         @exception = err
       ensure
