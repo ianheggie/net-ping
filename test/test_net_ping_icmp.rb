@@ -7,6 +7,7 @@
 #######################################################################
 require 'test-unit'
 require 'net/ping/icmp'
+require File.expand_path('../test_helper.rb', __FILE__)
 
 if File::ALT_SEPARATOR
   require 'win32/security'
@@ -24,6 +25,13 @@ class TC_PingICMP < Test::Unit::TestCase
   def setup
     @host = '127.0.0.1' # 'localhost'
     @icmp = Net::Ping::ICMP.new(@host)
+    @blackhole         = Net::Ping::ICMP.new(TestHelper.blackhole_ip)
+    if ENV['EXCLUDE'].to_s =~ /ICMP_ENETUNREACH_BUG/
+      @unreachable_host = @unreachable_route = nil
+    else
+      @unreachable_host  = TestHelper.unreachable_host && Net::Ping::ICMP.new(TestHelper.unreachable_host)
+      @unreachable_route = TestHelper.unreachable_route && Net::Ping::ICMP.new(TestHelper.unreachable_route)
+    end
   end
 
   test "icmp ping basic functionality" do
@@ -42,7 +50,7 @@ class TC_PingICMP < Test::Unit::TestCase
 
   test "icmp ping of local host is successful" do
     assert_true(Net::Ping::ICMP.new(@host).ping?)
-    assert_true(Net::Ping::ICMP.new('192.168.0.1').ping?)
+    assert_true(Net::Ping::ICMP.new('127.0.0.1').ping?)
   end
 
   test "ping? is an alias for ping" do
@@ -79,8 +87,8 @@ class TC_PingICMP < Test::Unit::TestCase
 
   test "host setter method basic functionality" do
     assert_respond_to(@icmp, :host=)
-    assert_nothing_raised{ @icmp.host = '192.168.0.1' }
-    assert_equal(@icmp.host, '192.168.0.1')
+    assert_nothing_raised{ @icmp.host = '127.0.0.1' }
+    assert_equal(@icmp.host, '127.0.0.1')
   end
 
   test "port method basic functionality" do
@@ -138,8 +146,77 @@ class TC_PingICMP < Test::Unit::TestCase
     assert_boolean(@icmp.ping)
   end
 
+  test 'ping should fail for an unreachable website' do
+    omit_unless(@unreachable_host)
+    @unreachable_host.timeout = 3
+    assert_false(@unreachable_host.ping?)
+  end
+
+  test 'ping should fail for a website on an unreachable route' do
+    omit_unless(@unreachable_route)
+    @unreachable_route.timeout = 3
+    assert_false(@unreachable_route.ping?)
+  end
+
+  test 'ping should fail for a black hole' do
+    @blackhole.timeout = 3
+    assert_false(@blackhole.ping?)
+  end
+
+  test "pinging an unreachable host returns after the timeout" do
+    omit_unless(@unreachable_host)
+    @unreachable_host.timeout = 1
+    tolerance = 0.5
+    start_time = Time.now
+    res = @unreachable_host.ping
+    elapsed = Time.now - start_time
+    assert_true(elapsed < @unreachable_host.timeout + tolerance,
+                'Expected elapsed (%1.1f) to be < timeout (%d) + tolerance (%1.1f), ping = %s, exception = %s' %
+                    [elapsed, @unreachable_host.timeout, tolerance, res, @unreachable_host.exception.inspect])
+  end
+
+
+  test "pinging a host on an unreachable network returns after the timeout" do
+    omit_unless(@unreachable_route)
+    @unreachable_route.timeout = 1
+    tolerance = 0.5
+    start_time = Time.now
+    res = @unreachable_route.ping
+    elapsed = Time.now - start_time
+    assert_true(elapsed < @unreachable_route.timeout + tolerance,
+                'Expected elapsed (%1.1f) to be < timeout (%d) + tolerance (%1.1f), ping = %s, exception = %s' %
+                    [elapsed, @unreachable_route.timeout, tolerance, res, @unreachable_route.exception.inspect])
+  end
+
+
+  test "pinging a blackhole returns after the timeout" do
+    @blackhole.timeout = 1
+    tolerance = 0.5
+    start_time = Time.now
+    res = @blackhole.ping
+    elapsed = Time.now - start_time
+    assert_true(elapsed < @blackhole.timeout + tolerance,
+                'Expected elapsed (%1.1f) to be < timeout (%d) + tolerance (%1.1f), ping = %s, exception = %s' %
+                    [elapsed, @blackhole.timeout, tolerance, res, @blackhole.exception.inspect])
+  end
+
+  test "pinging a blackhole waits for timeout" do
+    @blackhole.timeout = 3
+    tolerance = 0.5
+    start_time = Time.now
+    res = @blackhole.ping
+    elapsed = Time.now - start_time
+    assert_true(elapsed > @blackhole.timeout - tolerance,
+                'Expected elapsed (%1.1f) to be > timeout (%d) - tolerance (%1.1f), ping = %s, exception = %s' %
+                    [elapsed, @blackhole.timeout, tolerance, res, @blackhole.exception.inspect])
+  end
+
+
+
   def teardown
     @host = nil
     @icmp = nil
+    @unreachable = nil
+    @reserved_for_docs = nil
   end
 end
