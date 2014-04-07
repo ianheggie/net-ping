@@ -56,14 +56,14 @@ class TC_Net_Ping_External < Test::Unit::TestCase
     assert_true(@pe.ping?)
   end
 
-  test "pinging a good host sets response_data" do
+  test "pinging a bogus host returns false" do
+    assert_false(@bad.ping?)
+  end
+
+  test "pinging a good host keeps response_data" do
     @pe.ping
     assert_kind_of(String, @pe.response_data)
     assert_not_equal('', @pe.response_data)
-  end
-
-  test "pinging a bogus host returns false" do
-    assert_false(@bad.ping?)
   end
 
   test "pinging a bogus host returns blank response_data" do

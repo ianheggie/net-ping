@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), 'ping')
+require 'thread'
 
 if File::ALT_SEPARATOR
   require 'win32/security'
@@ -36,7 +37,6 @@ module Net
         end
       end
 
-      @seq = 0
       @bind_port = 0
       @bind_host = nil
       @data_size = 56
@@ -48,6 +48,16 @@ module Net
 
       super(host, port, timeout)
       @port = nil # This value is not used in ICMP pings.
+    end
+
+    # instance variables of the class, not available to sub classes
+    @seq = 0
+    @seq_mutex = Mutex.new
+
+    def self.next_seq
+      @seq_mutex.synchronize do
+       @seq = (@seq + 1) % 65536
+      end
     end
 
     # Sets the number of bytes sent in the ping method.
@@ -85,7 +95,7 @@ module Net
         socket.bind(saddr)
       end
 
-      @seq = (@seq + 1) % 65536
+      seq = ICMP.next_seq
       pstring = 'C2 n3 A' << @data_size.to_s
       timeout = @timeout
 

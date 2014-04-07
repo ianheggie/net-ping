@@ -15,6 +15,7 @@ class TC_Net_Ping_UDP < Test::Unit::TestCase
   def setup
     Net::Ping::UDP.service_check = false
     @host = '127.0.0.1'
+    @bad_host = '192.0.2.123' # "TEST-NET" block, should not exist
     @udp  = Net::Ping::UDP.new(@host)
     @udp_unused_port  = Net::Ping::UDP.new(@host, TestHelper.blackhole_port)
     @blackhole         = Net::Ping::UDP.new(TestHelper.blackhole_ip, TestHelper.blackhole_port)
@@ -45,6 +46,10 @@ class TC_Net_Ping_UDP < Test::Unit::TestCase
     assert_true(@udp.ping?)
   end
 
+  test "a udp ping to a non existant host returns false" do
+    assert_false(@bad.ping?)
+  end
+
   test "a successful udp ping sets response_data" do
     echo_cmd = File.expand_path('../udp_echo.rb', __FILE__)
     echo_process = IO.popen("ruby #{echo_cmd}", 'r')
@@ -54,7 +59,6 @@ class TC_Net_Ping_UDP < Test::Unit::TestCase
     echo_process.close
     assert_kind_of(String, @udp.response_data)
     assert_not_equal('', @udp.response_data)
-    assert_equal(@udp.data, @udp.response_data)
   end
 
 

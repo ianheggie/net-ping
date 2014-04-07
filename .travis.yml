@@ -13,6 +13,8 @@ bundler_args: --binstubs
 script: rvmsudo_secure_path=1 rvmsudo UNREACHABLE_ROUTE=192.0.2.1 UNREACHABLE_HOST=`test/find_unreachable_host.bash` EXCLUDE=$EXCLUDE bin/rake test
 matrix:
   include:
+    - rvm: 1.8.7
+      env: EXCLUDE=TCP_SERVICE_CHECK_UNUSED_PORT_BUG
     - rvm: 1.9.2
       env: EXCLUDE=TCP_SERVICE_CHECK_UNUSED_PORT_BUG
     - rvm: 1.9.3
