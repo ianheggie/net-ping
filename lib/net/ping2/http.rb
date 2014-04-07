@@ -154,11 +154,10 @@ module Net
       def do_ping(uri, port, timeout)
         response = nil
         proxy = uri.find_proxy || URI.parse("")
+        uri_path = uri.path.empty? ? '/' : uri.path
+        headers = {}
+        headers["User-Agent"] = user_agent if user_agent
         begin
-          uri_path = uri.path.empty? ? '/' : uri.path
-          headers = {}
-          headers["User-Agent"] = user_agent if user_agent
-
           http = Net::HTTP::Proxy(proxy.host, proxy.port, proxy.user, proxy.password).new(uri.host, port)
           http.read_timeout = timeout
           @proxied = http.proxy?
@@ -172,7 +171,9 @@ module Net
             http.use_ssl = true
             http.verify_mode = @ssl_verify_mode
           end
-          response = http.start { |h| h.request(request) }
+          response = Timeout.timeout(@timeout) do
+            http.start { |h| h.request(request) }
+          end
 
         rescue Exception => err
           @exception = err.message
