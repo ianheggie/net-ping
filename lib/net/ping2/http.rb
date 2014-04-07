@@ -90,6 +90,7 @@ module Net
 
         # A port provided here overrides anything provided in constructor
         port = (options[:port] || URI.split(host)[3] || (uri.scheme == 'https' && uri.port) || @port).to_i
+        timeout = options[:timeout] || @timeout
 
         start_time = Time.now
 
