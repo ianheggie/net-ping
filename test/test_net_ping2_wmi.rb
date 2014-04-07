@@ -20,16 +20,16 @@ class TestNetPing2WMI < Test::Unit::TestCase
 
     check_ping_arguments
     check_class_methods
-    check_attr_readers :data_size, :bind_host, :bind_port
+    check_attr_readers
     check_attr_accessors
     check_defaults :timeout => 5
 
     check_good_host_behaviour
-    check_bad_hosts_behaviour(self.bad_hosts, %w{response})
+    check_bad_hosts_behaviour(self.bad_hosts)
 
 
     def test_ping_basic
-      assert_respond_to(@ping, :ping)
+      assert_respond_to(@ping_with_host, :ping)
       # noinspection RubyArgCount
       assert_raise(ArgumentError) { @ping.ping }
     end
@@ -43,22 +43,22 @@ class TestNetPing2WMI < Test::Unit::TestCase
     end
 
     def test_ping_returns_struct
-      assert_kind_of(Struct::PingStatus, @ping.ping)
+      assert_kind_of(Struct::PingStatus, @ping_with_host.ping)
     end
 
     def test_ping_returns_boolean
-      assert_boolean(@ping.ping?)
+      assert_boolean(@ping_with_host.ping?)
       assert_boolean(@ping.ping?(@host))
     end
 
     def test_ping_expected_failure
-      assert_false(Ping2::WMI.new('bogus').ping?)
-      assert_false(Ping2::WMI.new('http://www.asdfhjklasdfhlkj.com').ping?)
+      assert_false(@ping.ping?('bogus'))
+      assert_false(@ping.ping?('http://www.asdfhjklasdfhlkj.com'))
     end
 
     def test_exception
       assert_respond_to(@ping, :exception)
-      assert_nothing_raised { @ping.ping }
+      assert_nothing_raised { @ping.ping(LOCALHOST_IP) }
       assert_nil(@ping.exception)
     end
 

@@ -100,8 +100,9 @@ module Net
 
       begin
         saddr = Socket.pack_sockaddr_in(0, host)
-      rescue Exception
-        socket.close unless socket.closed?
+      rescue Exception => err
+        @exception = err
+        socket.close if socket && ! socket.closed?
         return @success
       end
 
@@ -112,7 +113,7 @@ module Net
       rescue Errno::ENETUNREACH => err
         # rescue from unreachable host or network
         @exception = err
-        socket.close if socket
+        socket.close if socket && ! socket.closed?
         return @success
       end
 
@@ -150,7 +151,7 @@ module Net
       rescue Exception => err
         @exception = err
       ensure
-        socket.close if socket
+        socket.close if socket && ! socket.closed?
       end
 
       # There is no duration if the ping failed

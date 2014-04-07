@@ -35,7 +35,7 @@ class TestNetPing2ICMP < Test::Unit::TestCase
     check_defaults :timeout => 5
 
     check_good_host_behaviour
-    check_bad_hosts_behaviour(self.bad_hosts, %w{response})
+    check_bad_hosts_behaviour(self.bad_hosts)
 
 =begin
     test "icmp ping basic functionality" do

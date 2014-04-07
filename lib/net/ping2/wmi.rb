@@ -43,6 +43,10 @@ module Net
         'WMI ping only available under Windows' unless File::ALT_SEPARATOR
       end
 
+      def timeout=(value)
+        raise ArgumentError.new('WMI does not support timeout')
+      end
+
       # Unlike the ping method for other Ping subclasses, this version returns
       # a PingStatus struct which contains various bits of information about
       # the results of the ping itself, such as response time.
