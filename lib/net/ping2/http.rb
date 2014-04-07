@@ -93,40 +93,40 @@ module Net
 
         start_time = Time.now
 
-        response = do_ping(uri, port, timeout)
+        http_response = do_ping(uri, port, timeout)
 
-        if response.is_a?(Net::HTTPSuccess)
-          set_response_data(response)
+        if http_response.is_a?(Net::HTTPSuccess)
+          set_response(http_response)
           @success = true
-        elsif redirect? # Check code, HTTPRedirection does not always work
+        elsif redirect?(http_response) # Check code, HTTPRedirection does not always work
           if @follow_redirect
-            @warning = response.message
+            @warning = http_response.message
             rlimit = 0
 
-            while redirect?
+            while redirect?(http_response)
               if rlimit >= redirect_limit
                 @exception = "Redirect limit exceeded"
                 break
               end
-              redirect = URI.parse(response['location'])
+              redirect = URI.parse(http_response['location'])
               redirect = uri + redirect if redirect.relative?
-              response = do_ping(redirect, port, timeout)
+              http_response = do_ping(redirect, port, timeout)
               rlimit += 1
             end
 
-            if response.is_a?(Net::HTTPSuccess)
-              set_response_data(response)
+            if http_response.is_a?(Net::HTTPSuccess)
+              set_response(http_response)
               @success = true
             else
               @warning = nil
-              @exception ||= response.message
+              @exception ||= http_response.message
             end
 
           else
-            @exception = response.message
+            @exception = http_response.message
           end
         else
-          @exception ||= response.message
+          @exception ||= http_response.message
         end
 
         # There is no duration if the ping failed
@@ -147,12 +147,12 @@ module Net
 
       private
 
-      def redirect?
-        self.response && self.response.code.to_i >= 300 && self.response.code.to_i < 400
+      def redirect?(http_response)
+        http_response && http_response.code.to_i >= 300 && http_response.code.to_i < 400
       end
 
       def do_ping(uri, port, timeout)
-        response = nil
+        http_response = nil
         proxy = uri.find_proxy || URI.parse("")
         uri_path = uri.path.empty? ? '/' : uri.path
         headers = {}
@@ -171,25 +171,25 @@ module Net
             http.use_ssl = true
             http.verify_mode = @ssl_verify_mode
           end
-          response = Timeout.timeout(@timeout) do
+          http_response = Timeout.timeout(timeout) do
             http.start { |h| h.request(request) }
           end
 
         rescue Exception => err
           @exception = err.message
         end
-        @code = response.code if response
-        response
+        @code = http_response.code if http_response
+        http_response
       end
 
 
-      def set_response_data(response)
+      def set_response(http_response)
         if @get_request
-          @response_data = response.body
+          @response = http_response.body
         else
-          @response_data = "HTTP#{response.http_version ? ('/' << response.http_version) : ''} #{response.code} #{response.message}\n"
-          response.header.each do |key, value|
-            @response_data << "#{key}: #{value}\n"
+          @response = "HTTP#{http_response.http_version ? ('/' << http_response.http_version) : ''} #{http_response.code} #{http_response.message}\n"
+          http_response.header.each do |key, value|
+            @response << "#{key}: #{value}\n"
           end
         end
       end
