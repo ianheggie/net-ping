@@ -30,8 +30,7 @@ module Net
           return PermissionError, 'ICMP requires elevated security'
         end
       end
-      return 'Address family not supported by protocol bug'
-      #return nil
+      nil
     end
 
 
