@@ -40,7 +40,6 @@ module Net
       def self.not_available_message
         # noinspection RubyResolve
         return 'JRUBY-6974 - Timeout.timeout not working using UDPSocket (needs non-blocking socket rework)' if defined? JRUBY_VERSION
-        return 'Address family not supported by protocol bug'
       end
 
       # Creates and returns a new Net::Ping2:: object.  This is effectively
