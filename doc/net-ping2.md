@@ -5,12 +5,12 @@
    require 'net/ping'
    include Net
 
-   Ping::TCP.service_check = true
+   Net::Ping2::TCP.service_check = true
 
-   pt = Net::Ping::TCP.new(host)
-   pu = Net::Ping::UDP.new(host)
-   pe = Net::Ping::External.new(host)
-   ph = Net::Ping::HTTP.new(uri)
+   pt = Net::Ping2::TCP.new(host)
+   pu = Net::Ping2::UDP.new(host)
+   pe = Net::Ping2::External.new(host)
+   ph = Net::Ping2::HTTP.new(uri)
 
    if pt.ping
       puts "TCP ping successful"
@@ -37,103 +37,103 @@
    end
 
 = Ping Classes
-   * Ping::TCP
-   * Ping::UDP
-   * Ping::External
-   * Ping::HTTP
-   * Ping::ICMP
-   * Ping::WMI
-   * Ping::LDAP
+   * Net::Ping2::TCP
+   * Net::Ping2::UDP
+   * Net::Ping2::External
+   * Net::Ping2::HTTP
+   * Net::Ping2::ICMP
+   * Net::Ping2::WMI
+   * Net::Ping2::LDAP
 
-   All Ping classes are children of the Ping parent class (which should
+   All Ping2 classes are children of the Ping2 parent class (which should
    never be instantiated directly).
 
-   The Ping::ICMP class requires root/administrative privileges.
+   The Net::Ping2::ICMP class requires root/administrative privileges.
 
-   The Ping::WMI class only works on MS Windows.
+   The Net::Ping2::WMI class only works on MS Windows.
 
-== Net::Ping
-Net::Ping.new(host=nil, port=7, timeout=5)
-   Creates and returns a new Ping object.  If the host is not specified
+== Net::Ping2
+Net::Ping2.new(host=nil, port=7, timeout=5)
+   Creates and returns a new Ping2 object.  If the host is not specified
    in the constructor then it must be specified in the ping method.
 
-== Net::Ping::TCP
-Ping::TCP.service_check
+== Net::Ping2::TCP
+Ping2::TCP.service_check
    Returns the setting for how ECONNREFUSED is handled. By default, this is
    set to false, i.e. an ECONNREFUSED error is considered a failed ping.
 
-Ping::TCP.service_check=(bool)
+Ping2::TCP.service_check=(bool)
    Sets the behavior for how ECONNREFUSED is handled. By default, this is
    set to false, i.e. an ECONNREFUSED error is considered a failed ping.
 
-Ping::TCP#ping(host=nil)
+Ping2::TCP#ping(host=nil)
    Attempts to open a connection using TCPSocket with a +host+ specified
    either here or in the constructor.  A successful open means the ping was
    successful and true is returned.  Otherwise, false is returned.
 
-== Net::Ping::UDP
-Ping::UDP#ping
+== Net::Ping2::UDP
+Ping2::UDP#ping
    Attempts to open a connection using UDPSocket and sends the value of
-   Ping::UDP#data as a string across the socket.  If the return string matches,
+   Net::Ping2::UDP#data as a string across the socket.  If the return string matches,
    then the ping was successful and true is returned.  Otherwise, false is
    returned.
 	
-Ping::UDP#data
+Ping2::UDP#data
    Returns the string that is sent across the UDP socket.
 	
-Ping::UDP#data=(string)
+Ping2::UDP#data=(string)
    Sets the string that is sent across the UDP socket.  The default is "ping".
    Note that the +string+ cannot be larger than MAX_DATA (64 characters).
 
-== Net::Ping::External
-Ping::External#ping
+== Net::Ping2::External
+Ping2::External#ping
    Uses the 'open3' module and calls your system's local 'ping' command with
    various options, depending on platform.  If nothing is sent to stderr, the
    ping was successful and true is returned.  Otherwise, false is returned.
 
    The MS Windows platform requires the 'win32-open3' package.
 	
-== Ping::HTTP
-Ping::HTTP.new(uri=nil, port=80, timeout=5)
-   Identical to Net::Ping.new except that, instead of a host, the first
+== Net::Ping2::HTTP
+Ping2::HTTP.new(uri=nil, port=80, timeout=5)
+   Identical to Net::Ping2.new except that, instead of a host, the first
    argument is a URI.
 	
-Ping::HTTP#ping
+Ping2::HTTP#ping
    Checks for a response against +uri+.  As long as kind of Net::HTTPSuccess
    response is returned, the ping is successful and true is returned.
-   Otherwise, false is returned and Ping::HTTP#exception is set to the error
+   Otherwise, false is returned and Net::Ping2::HTTP#exception is set to the error
    message.
 
    Note that redirects are automatically followed unless the
-   Ping::HTTP#follow_redirects method is set to false.
+   Net::Ping2::HTTP#follow_redirects method is set to false.
 
-Ping::HTTP#follow_redirect
+Ping2::HTTP#follow_redirect
    Indicates whether or not a redirect should be followed in a ping attempt.
    By default this is set to true.
 
-Ping::HTTP#follow_redirect=(bool)
+Ping2::HTTP#follow_redirect=(bool)
    Sets whether or not a redirect should be followed in a ping attempt.  If
    set to false, then any redirect is considered a failed ping.
 
-Ping::HTTP#uri
-   An alias for Ping::HTTP#host.
+Ping2::HTTP#uri
+   An alias for Net::Ping2::HTTP#host.
 	
-Ping::HTTP#uri=(uri)
-   An alias for Ping::HTTP#host=.
+Ping2::HTTP#uri=(uri)
+   An alias for Net::Ping2::HTTP#host=.
 
-== Ping::ICMP
-Ping::ICMP#duration
+== Net::Ping2::ICMP
+Ping2::ICMP#duration
    The time it took to ping the host.  Not a precise value but a good estimate.
 
-== Ping::WMI
-Ping::WMI#ping(host, options={})
-   Unlike other Ping classes, this method returns a PingStatus struct that
+== Net::Ping2::WMI
+Ping2::WMI#ping(host, options={})
+   Unlike other Ping2 classes, this method returns a PingStatus struct that
    contains various bits of information about the ping itself. The PingStatus
    struct is a wrapper for the Win32_PingStatus WMI class.
 
    In addition, you can pass options that will be interpreted as WQL parameters.
 
-Ping::WMI#ping?(host, options={})
+Ping2::WMI#ping?(host, options={})
    Returns whether or not the ping succeeded.
 
 = Common Instance Methods
@@ -168,7 +168,7 @@ Ping#timeout=(time)
 	
 Ping#warning
    Returns a warning string that was returned during the ping attempt.  This
-   typically occurs only in the Ping::External class, or the Ping::HTTP class
+   typically occurs only in the Net::Ping2::External class, or the Net::Ping2::HTTP class
    if a redirect occurred.
 
 == Notes
@@ -189,10 +189,10 @@ Ping#warning
 
    A: It's possible that the echo port has been disabled on the remote
       host for security reasons. Your best best is to specify a different port
-      or to use Ping::ICMP or Ping::External instead.
+      or to use Net::Ping2::ICMP or Net::Ping2::External instead.
       
       In the case of UDP pings, they are often actively refused. It may be
-      more pragmatic to set Ping::UDP.service_check = false.
+      more pragmatic to set Net::Ping2::UDP.service_check = false.
 
    Q: "Why does a TCP ping return false when I know it should return true?"
 
@@ -224,7 +224,7 @@ Ping#warning
    https://github.com/djberg96/net-ping
 
 = Acknowledgements
-   The Ping::ICMP#ping method is based largely on the identical method from
+   The Net::Ping2::ICMP#ping method is based largely on the identical method from
    the Net::Ping Perl module by Rob Brown. Much of the code was ported by
    Jos Backus on ruby-talk.
 

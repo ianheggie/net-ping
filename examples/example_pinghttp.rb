@@ -4,19 +4,21 @@
 # A short sample program demonstrating an http ping. You can run
 # this program via the example:http task. Modify as you see fit.
 ########################################################################
-require 'net/ping'
+require 'net/ping2'
 
 good = 'http://www.google.com/index.html'
-bad  = 'http://www.ruby-lang.org/index.html'
+bad = 'http://www.ruby-lang.org/index.html'
 
-puts "== Good ping, no redirect"
+puts "== PING HTTP =="
 
-p1 = Net::Ping::HTTP.new(good)
+puts "-- Good ping, no redirect"
+
+p1 = Net::Ping2::HTTP.new(:host => good)
 p p1.ping?
 
-puts "== Bad ping"
+puts "-- Bad ping"
 
-p2 = Net::Ping::HTTP.new(bad)
-p p2.ping?
+p2 = Net::Ping2::HTTP.new()
+p p2.ping?(bad)
 p p2.warning
 p p2.exception

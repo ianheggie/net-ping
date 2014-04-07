@@ -1,0 +1,34 @@
+#init:
+#  #- cinst ruby
+#  #- cinst pik
+#  #- c:\pik\pik
+platform:
+  #- x86
+  - x64
+environment:
+  matrix:
+    - PING2_CLASSES: ""
+      RUBYGEMS_VERSION: ""
+    - PING2_CLASSES: "all"
+      RUBYGEMS_VERSION: ""
+matrix:
+  allow_failures:
+    - PING2_CLASSES: "all"
+      RUBYGEMS_VERSION: ""
+install:
+  - ruby -v
+  - gem update --system %RUBYGEMS_VERSION%
+  - gem --version
+  - gem install bundler
+  - bundle --version
+  - cmd: echo hello from batch command
+  - ps: Write-Host "Hello!"
+  - cmd: bundle install --binstubs
+  - cmd: path
+  - cmd: set
+hosts:
+  localhost: 127.0.0.1
+build_script:
+  - bundle exec rake gem:create
+test_script:
+  - bundle exec rake test

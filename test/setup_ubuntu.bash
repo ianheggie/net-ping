@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 # . test/setup_ubuntu.bash # will setup env variables after testing
 
@@ -34,5 +34,10 @@ netstat -l -n | egrep ':22 '
 export UNREACHABLE_ROUTE=192.0.2.1
 set +e
 export UNREACHABLE_HOST=`test/find_unreachable_host.bash`
+
+ifconfig
+cat /etc/hosts
+cat /etc/resolv.conf
+ruby -rresolv -e 'puts Resolv::DNS.new.getresource("_rubygems._tcp.rubygems.org", Resolv::DNS::Resource::IN::SRV).target'
 
 set +x
