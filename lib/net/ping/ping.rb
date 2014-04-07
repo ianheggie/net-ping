@@ -41,6 +41,14 @@ module Net
       #
       attr_reader :duration
 
+      # The data to send to the remote host. Nil by default.
+      # 
+      attr_accessor :data
+
+      # The data received from the remote host, if any.
+      # 
+      attr_accessor :response_data
+
       # The default constructor for the Net::Ping class.  Accepts an optional
       # +host+, +port+ and +timeout+.  The port defaults to your echo port, or
       # 7 if that happens to be undefined.  The default timeout is 5 seconds.
@@ -61,6 +69,8 @@ module Net
          @exception = nil
          @warning   = nil
          @duration  = nil
+         @data = nil
+         @response_data = nil
 
          yield self if block_given?
       end

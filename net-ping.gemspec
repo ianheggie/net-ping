@@ -17,9 +17,10 @@ Gem::Specification.new do |spec|
   # The TCP Ping class requires this for non-blocking sockets.
   spec.required_ruby_version = ">= 1.9.3"
 
-  spec.add_development_dependency('test-unit')
-  spec.add_development_dependency('fakeweb')
+  spec.add_development_dependency('test-unit', '>= 2.5.0')
+  spec.add_development_dependency('fakeweb', '>= 1.3.0')
   spec.add_development_dependency('rake')
+  spec.add_development_dependency "pry"
 
   if File::ALT_SEPARATOR
     require 'rbconfig'
