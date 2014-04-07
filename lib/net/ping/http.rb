@@ -93,6 +93,7 @@ module Net
       self.response = do_ping(uri, port)
 
       if self.response.is_a?(Net::HTTPSuccess)
+        set_response_data(response)
         bool = true
       elsif redirect? # Check code, HTTPRedirection does not always work
         if @follow_redirect
@@ -111,6 +112,7 @@ module Net
           end
 
           if self.response.is_a?(Net::HTTPSuccess)
+            set_response_data(response)
             bool = true
           else
             @warning   = nil
@@ -171,5 +173,18 @@ module Net
       @code = response.code if response
       response
     end
+
+    def set_response_data(response)
+      if @get_request
+        @response_data = response.body
+      else
+        @response_data = "HTTP#{response.http_version ? ('/' << response.http_version) : ''} #{response.code} #{response.message}\n"
+        response.header.each do |key, value|
+          @response_data << "#{key}: #{value}\n"
+        end
+      end
+    end
+
   end
+
 end

@@ -50,6 +50,28 @@ class TC_Net_Ping_HTTP < Test::Unit::TestCase
     assert_boolean(@bad.ping?)
   end
 
+
+  test "ping returns with header in response_data" do
+    assert_false(@http.get_request)
+    @http.ping
+    assert_kind_of(String, @http.response_data)
+    assert_not_equal('', @http.response_data)
+    assert_match(/^HTTP/, @http.response_data)
+  end
+
+  test "ping get_request returns with body in response_data" do
+    @http.get_request = true
+    @http.ping
+    assert_kind_of(String, @http.response_data)
+    assert_not_equal('', @http.response_data)
+    assert_match('PONG', @http.response_data)
+  end
+
+  test "pinging a bogus host returns nil response_data" do
+    @bad.ping
+    assert_nil(@bad.response_data)
+  end
+
   test 'ping? is an alias for ping' do
     assert_alias_method(@http, :ping?, :ping)
   end

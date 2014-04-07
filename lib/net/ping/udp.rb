@@ -5,6 +5,8 @@ module Net
 
   # The Ping::UDP class encapsulates methods for UDP pings.
   class Ping::UDP < Ping
+    ECHO_PORT = 7
+
     @@service_check = true
       
     # Returns whether or not the connect behavior should enforce remote
@@ -69,7 +71,6 @@ module Net
     #
     def ping(host = @host)
       super(host)
-
       bool  = false
       udp   = UDPSocket.open
       array = []
@@ -95,7 +96,8 @@ module Net
       rescue Exception => err
         @exception = err
       else
-        if @response_data #== @data # response doesn't have to match data sent
+        # expect something back, but might not match data sent (echo port is a well known exception)
+        if @response_data && (@response_data == @data || @port != ECHO_PORT)
           bool = true
         end
       ensure

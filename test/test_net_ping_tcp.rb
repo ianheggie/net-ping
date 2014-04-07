@@ -27,6 +27,13 @@ class TC_PingTCP < Test::Unit::TestCase
     assert_nothing_raised{ @tcp.ping(@host) }
   end
 
+
+  def test_ping_returns_response_data
+    @tcp.ping
+    assert_kind_of(String, @tcp.response_data)
+    assert_not_equal('', @tcp.response_data)
+  end
+
   def test_ping_aliases
     assert_respond_to(@tcp, :ping?)
     assert_respond_to(@tcp, :pingecho)

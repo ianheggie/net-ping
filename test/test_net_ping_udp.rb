@@ -45,6 +45,19 @@ class TC_Net_Ping_UDP < Test::Unit::TestCase
     assert_true(@udp.ping?)
   end
 
+  test "a successful udp ping sets response_data" do
+    echo_cmd = File.expand_path('../udp_echo.rb', __FILE__)
+    echo_process = IO.popen("ruby #{echo_cmd}", 'r')
+    port = echo_process.gets.to_i
+    @udp.port = port
+    @udp.ping
+    echo_process.close
+    assert_kind_of(String, @udp.response_data)
+    assert_not_equal('', @udp.response_data)
+    assert_equal(@udp.data, @udp.response_data)
+  end
+
+
   test "bind basic functionality" do
     assert_respond_to(@udp, :bind)
     assert_nothing_raised{ @udp.bind('127.0.0.1', 80) }

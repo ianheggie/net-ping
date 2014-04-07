@@ -25,6 +25,8 @@ class TC_Net_Ping_External < Test::Unit::TestCase
 
   test "ping basic functionality" do
     assert_respond_to(@pe, :ping)
+    assert_respond_to(@pe, :data)
+    assert_respond_to(@pe, :response_data)
   end
 
   test "ping with no arguments" do
@@ -54,8 +56,20 @@ class TC_Net_Ping_External < Test::Unit::TestCase
     assert_true(@pe.ping?)
   end
 
+  test "pinging a good host sets response_data" do
+    @pe.ping
+    assert_kind_of(String, @pe.response_data)
+    assert_not_equal('', @pe.response_data)
+  end
+
   test "pinging a bogus host returns false" do
     assert_false(@bad.ping?)
+  end
+
+  test "pinging a bogus host returns blank response_data" do
+    @bad.ping
+    assert_kind_of(String, @bad.response_data)
+    assert_equal('', @bad.response_data)
   end
 
   test "duration basic functionality" do

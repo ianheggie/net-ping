@@ -63,6 +63,13 @@ class TC_PingICMP < Test::Unit::TestCase
     assert_true(Net::Ping::ICMP.new('127.0.0.1').ping?)
   end
 
+  test "a successful icmp ping sets response_data" do
+    @icmp = Net::Ping::ICMP.new(@host)
+    @icmp.ping
+    assert_kind_of(String, @icmp.response_data)
+    assert_not_equal('', @icmp.response_data)
+  end
+
   test "threaded icmp ping returns expected results" do
     omit_if(@@jruby)
     ips = ['8.8.4.4', '8.8.9.9', '127.0.0.1', '8.8.8.8', '8.8.8.9']

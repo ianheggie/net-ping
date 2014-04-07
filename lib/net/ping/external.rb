@@ -88,14 +88,15 @@ module Net
     # If it exceeds the given timeout in seconds, kills it.
     # Returns a list of the form
     #
-    #   [exit_code, err]
+    #   [exit_code, err, response_data]
     #
-    # which contains any output sent by the command to stderr as a String.
+    # which contains the exit code and any output sent by the command to stderr and stdout as a String.
     # Uses Kernel.select to wait up to the timeout length (in seconds)
     # before killing the process spawned by Open3.
     #
     def run_with_timeout(*command)
       err = nil
+      response_data = ''
       exit_code = nil
 
       begin
@@ -113,6 +114,9 @@ module Net
             next
           rescue EOFError
             # Command has completed, not really an error...
+            if File::ALT_SEPARATOR
+              response_data = stdout.read(ERR_MSG_SIZE)
+            end
             break
           end
         end
@@ -135,25 +139,7 @@ module Net
         stderr.close if stderr
       end
       err ||= ''
-      return [exit_code, err]
-    end
-
-    # Runs a command without a timeout. The returned value
-    # is a list of the form
-    #
-    #   [exit_code, err]
-    #
-    def run_no_timeout(*command)
-      out, err, exit_code = Open3.capture3(*command)
-      if exit_code != 0 and (err.nil? or err.empty?)
-        out.each_line do |line|
-          if line =~ /(timed out|could not find host)/i
-            err = line
-            break
-          end
-        end
-      end
-      return [exit_code, err]
+      return [exit_code, err, response_data]
     end
 
     alias ping? ping

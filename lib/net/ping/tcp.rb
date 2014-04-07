@@ -26,6 +26,10 @@ module Net
       @@service_check = bool
     end
 
+    # Try and grab up to 1k from the first packet
+    MAX_DATA = 1024
+      
+    # Creates and returns a new Ping::UDP object.  This is effectively
     # This method attempts to ping a host and port using a TCPSocket with
     # the host, port and timeout values passed in the constructor.  Returns
     # true if successful, or false otherwise.
@@ -66,8 +70,20 @@ module Net
           return false
         end
 
-        resp = IO.select(nil, [sock], nil, timeout)
+        unless @data.nil? || @data.empty? 
+          resp = IO.select(nil, [sock], nil, timeout)
+          if resp.nil?
+            if @@service_check
+              bool = true
+            else
+              @exception = Errno::ECONNREFUSED
+            end
+            return bool
+          end
+          sock.send(@data, 0)
+        end
 
+        resp = IO.select([sock], nil, nil, timeout)
         # Assume ECONNREFUSED at this point
         if resp.nil?
           if @@service_check
@@ -77,6 +93,7 @@ module Net
           end
         else
           bool = true
+          @response_data, ignore_addrinfo = sock.recvfrom(MAX_DATA)
         end
       ensure
         sock.close if sock
@@ -100,3 +117,5 @@ module Net
     end
   end
 end
+
+
