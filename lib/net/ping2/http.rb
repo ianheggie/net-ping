@@ -161,6 +161,7 @@ module Net
         begin
           http = Net::HTTP::Proxy(proxy.host, proxy.port, proxy.user, proxy.password).new(uri.host, port)
           http.read_timeout = timeout
+          http.open_timeout = timeout
           @proxied = http.proxy?
           if @get_request == true
             request = Net::HTTP::Get.new(uri_path)
