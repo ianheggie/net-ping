@@ -22,9 +22,8 @@ class TestNetPing2HTTP < Test::Unit::TestCase
       @uri_https = 'https://encrypted.google.com'
       @proxy = 'http://username:password@proxy:3128'
       @redirect = 'http://jigsaw.w3.org/HTTP/300/302.html'
-
-      FakeWeb.allow_net_connect = allow_net_connect
-
+      @orig_allow_net_connect = FakeWeb.allow_net_connect
+      FakeWeb.allow_net_connect = allow_net_connect()
       FakeWeb.register_uri(:head, 'http://' << LOCALHOST_IP, :body => 'PONG')
 
       FakeWeb.register_uri(:get, @uri, :body => 'PONG')
@@ -47,6 +46,11 @@ class TestNetPing2HTTP < Test::Unit::TestCase
       @ping = Net::Ping2::HTTP.new()
       @ping_with_host = Net::Ping2::HTTP.new(:host => LOCALHOST_IP)
 
+    end
+
+    def teardown
+      FakeWeb.clean_registry
+      FakeWeb.allow_net_connect = @orig_allow_net_connect
     end
 
     check_ping_arguments
