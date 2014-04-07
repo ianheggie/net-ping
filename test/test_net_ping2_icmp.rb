@@ -5,9 +5,8 @@
 # with root privileges on UNIX systems. This should be run via the
 # 'test' or 'test:icmp' Rake task.
 #######################################################################
-require 'test-unit'
-require 'net/ping2/icmp'
 require File.expand_path('../test_helper.rb', __FILE__)
+require 'net/ping2/icmp'
 require 'thread'
 
 class TestNetPing2ICMP < Test::Unit::TestCase

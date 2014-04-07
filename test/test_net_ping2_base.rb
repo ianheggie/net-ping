@@ -1,8 +1,7 @@
 # Test base functionality
 
-require 'test-unit'
-require 'net/ping2/external'
 require File.expand_path('../test_helper.rb', __FILE__)
+require 'net/ping2/base'
 
 class TestNetPing2Base < Test::Unit::TestCase
   #extend TestHelper

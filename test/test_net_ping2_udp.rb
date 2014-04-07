@@ -7,9 +7,8 @@
 # If someone could provide me a host where a udp ping actually
 # works (with a service check), I would appreciate it. :)
 ########################################################################
-require 'test-unit'
-require 'net/ping2/udp'
 require File.expand_path('../test_helper.rb', __FILE__)
+require 'net/ping2/udp'
 
 class TestNetPing2UDP < Test::Unit::TestCase
   if Net::Ping2::UDP.available?

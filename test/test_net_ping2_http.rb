@@ -4,10 +4,9 @@
 # Test case for the Net::PingHTTP class. This should be run via the 'test' or
 # 'test:http' Rake task.
 #################################################################################
-require 'test-unit'
+require File.expand_path('../test_helper.rb', __FILE__)
 require 'fakeweb'
 require 'net/ping2/http'
-require File.expand_path('../test_helper.rb', __FILE__)
 
 class TestNetPing2HTTP < Test::Unit::TestCase
   #extend TestHelper

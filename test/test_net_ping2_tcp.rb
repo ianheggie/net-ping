@@ -4,10 +4,9 @@
 # Test case for the Net::PingTCP class. This test should be run via
 # the 'test' or 'test:tcp' Rake task.
 #####################################################################
-require 'test-unit'
+require File.expand_path('../test_helper.rb', __FILE__)
 require 'net/ping2/tcp'
 include Net
-require File.expand_path('../test_helper.rb', __FILE__)
 
 class TestNetPing2Tcp < Test::Unit::TestCase
 

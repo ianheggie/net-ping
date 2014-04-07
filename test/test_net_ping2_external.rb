@@ -8,11 +8,9 @@
 # OpenDNS. This is apparently caused by them messing with upstream
 # replies for advertising purposes.
 #########################################################################
-require 'test-unit'
-
-#require 'net/ping2/external'
-require File.expand_path('../../lib/net/ping2/external.rb', __FILE__)
 require File.expand_path('../test_helper.rb', __FILE__)
+
+require 'net/ping2/external'
 
 class TestNetPing2External < Test::Unit::TestCase
 

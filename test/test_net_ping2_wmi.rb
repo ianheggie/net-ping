@@ -5,7 +5,7 @@
 # run MS Windows.  You should run this test via the 'test' or
 # 'test:wmi' Rake task.
 #######################################################################
-require 'test-unit'
+require File.expand_path('../test_helper.rb', __FILE__)
 require 'net/ping2/wmi'
 
 class TestNetPing2WMI < Test::Unit::TestCase
@@ -26,53 +26,53 @@ class TestNetPing2WMI < Test::Unit::TestCase
 
     check_good_host_behaviour
     check_bad_hosts_behaviour(self.bad_hosts, %w{response})
-  end
 
-  def test_ping_basic
-    assert_respond_to(@ping, :ping)
-    # noinspection RubyArgCount
-    assert_raise(ArgumentError) { @ping.ping }
-  end
 
-  def test_ping_with_host
-    assert_nothing_raised { @ping.ping(@host) }
-  end
+    def test_ping_basic
+      assert_respond_to(@ping, :ping)
+      # noinspection RubyArgCount
+      assert_raise(ArgumentError) { @ping.ping }
+    end
 
-  def test_ping_with_options
-    assert_nothing_raised { @ping.ping(@host, :NoFragmentation => true) }
-  end
+    def test_ping_with_host
+      assert_nothing_raised { @ping.ping(@host) }
+    end
 
-  def test_ping_returns_struct
-    assert_kind_of(Struct::PingStatus, @ping.ping)
-  end
+    def test_ping_with_options
+      assert_nothing_raised { @ping.ping(@host, :NoFragmentation => true) }
+    end
 
-  def test_ping_returns_boolean
-    assert_boolean(@ping.ping?)
-    assert_boolean(@ping.ping?(@host))
-  end
+    def test_ping_returns_struct
+      assert_kind_of(Struct::PingStatus, @ping.ping)
+    end
 
-  def test_ping_expected_failure
-    assert_false(Ping2::WMI.new('bogus').ping?)
-    assert_false(Ping2::WMI.new('http://www.asdfhjklasdfhlkj.com').ping?)
-  end
+    def test_ping_returns_boolean
+      assert_boolean(@ping.ping?)
+      assert_boolean(@ping.ping?(@host))
+    end
 
-  def test_exception
-    assert_respond_to(@ping, :exception)
-    assert_nothing_raised { @ping.ping }
-    assert_nil(@ping.exception)
-  end
+    def test_ping_expected_failure
+      assert_false(Ping2::WMI.new('bogus').ping?)
+      assert_false(Ping2::WMI.new('http://www.asdfhjklasdfhlkj.com').ping?)
+    end
 
-  def test_warning
-    assert_respond_to(@ping, :warning)
-  end
+    def test_exception
+      assert_respond_to(@ping, :exception)
+      assert_nothing_raised { @ping.ping }
+      assert_nil(@ping.exception)
+    end
 
-else
-  def test_new_raises_exception
-    assert_raise(NotImplementedError) { Net::Ping2::WMI.new }
-  end
+    def test_warning
+      assert_respond_to(@ping, :warning)
+    end
 
-  def tests_are_disabled
-    omit('tests are disabled: ' + Net::Ping2::WMI.not_available_message)
+  else
+    def test_new_raises_exception
+      assert_raise(NotImplementedError) { Net::Ping2::WMI.new }
+    end
+
+    def tests_are_disabled
+      omit('tests are disabled: ' + Net::Ping2::WMI.not_available_message)
+    end
   end
-end
 end
