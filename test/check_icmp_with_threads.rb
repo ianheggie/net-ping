@@ -25,7 +25,7 @@ end
 
 CONCURRENCY.times do
   threads << Thread.new(queue) do |q|
-    while ! q.empty?
+    while !q.empty?
       ip = q.pop
       expect_failure = ip =~ /9$/
       ping = Net::Ping::ICMP.new(ip, nil, 1)
@@ -40,5 +40,5 @@ CONCURRENCY.times do
   end
 end
 puts 'Waiting for threads'
-threads.each {|t| t.join}
+threads.each { |t| t.join }
 puts 'Finished without error'

@@ -180,20 +180,19 @@ module Net
         @code = response.code if response
         response
       end
-    end
 
 
-    def set_response_data(response)
-      if @get_request
-        @response_data = response.body
-      else
-        @response_data = "HTTP#{response.http_version ? ('/' << response.http_version) : ''} #{response.code} #{response.message}\n"
-        response.header.each do |key, value|
-          @response_data << "#{key}: #{value}\n"
+      def set_response_data(response)
+        if @get_request
+          @response_data = response.body
+        else
+          @response_data = "HTTP#{response.http_version ? ('/' << response.http_version) : ''} #{response.code} #{response.message}\n"
+          response.header.each do |key, value|
+            @response_data << "#{key}: #{value}\n"
+          end
         end
       end
+
     end
-
-
   end
 end
