@@ -29,6 +29,6 @@ install:
 hosts:
   localhost: 127.0.0.1
 build_script:
-  - bundle exec rake gem:create
+  - bundle exec rake build
 test_script:
   - bundle exec rake test
