@@ -56,6 +56,7 @@ module Net
         @ssl_verify_mode = OpenSSL::SSL::VERIFY_NONE
         @get_request = false
         @port = 80
+        @port = URI.parse(options[:host]).port if options[:host]
         #@code = nil
         @user_agent = 'net-ping2'
         super(options)
@@ -76,20 +77,24 @@ module Net
       # If no file or path is specified in the URI, then '/' is assumed.
       # If no scheme is present in the URI, then 'http' is assumed.
       #
-      def ping(host = @host, options = {})
+      def ping(host = nil, options = {})
 
         super(host, options)
 
         # See https://bugs.ruby-lang.org/issues/8645
-        if host =~ %r{^//}
-          host = "http:#{host}"
-        elsif host !~ %r{^https?://}
-          host = "http://#{host}"
+        url = host || @host
+        if url =~ %r{^//}
+          url = "http:#{url}"
+        elsif url !~ %r{^https?://}
+          url = "url://#{url}"
         end
-        uri = URI.parse(host)
+        uri = URI.parse(url)
 
         # A port provided here overrides anything provided in constructor
-        port = (options[:port] || URI.split(host)[3] || (uri.scheme == 'https' && uri.port) || @port).to_i
+        port = options[:port]
+        port ||= uri.port if host
+        port ||= @port
+
         timeout = options[:timeout] || @timeout
 
         start_time = Time.now
