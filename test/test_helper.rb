@@ -115,7 +115,7 @@ module TestHelper
     klass = self
     bad_host_name_list.each do |name, host|
       define_method "test_pinging_#{name}_returns_false_and_sets_attributes_accordingly" do
-        @ping.timeout = 3
+        @ping.timeout = 2
         @ping.port = klass.blackhole_port if @ping.respond_to? :port=
         started = Time.now
         @result = @ping.ping?(host)
@@ -128,7 +128,7 @@ module TestHelper
         ['duration', should_be_nil].flatten.each do |method|
           assert_nil(@ping.send(method), "#{method} should be nil on failure") if method
         end
-        assert_true(@duration < 3.9, "pinging #{name} should take < 2.9 seconds, actually took #{@duration}")
+        assert_true(@duration < 3.9, "pinging #{name} should take < 3.9 seconds, actually took #{@duration}")
       end
     end
   end
