@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 
-require 'coveralls'
-Coveralls.wear!
+if ENV['TRAVIS']
+  require 'coveralls'
+  Coveralls.wear!
+end
 
 require 'test-unit'
 
