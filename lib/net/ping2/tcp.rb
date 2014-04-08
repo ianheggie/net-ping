@@ -68,6 +68,7 @@ module Net
         opt2 = {
             :service_check => @service_check,
             :timeout => @timeout,
+            :data => @data,
             :port => @port}
         options = opt1.merge(opt2).merge(options)
 
@@ -101,12 +102,12 @@ module Net
           end
 
           timeout = options[:timeout]
-          if @data.nil? || @data.empty?
+          if options[:data].nil? || options[:data].empty?
             resp = IO.select(nil, [sock], nil, options[:timeout])
           else
             resp = IO.select(nil, [sock], nil, timeout)
             unless resp.nil?
-              sock.send(@data, 0)
+              sock.send(options[:data], 0)
               resp = IO.select([sock], nil, nil, options[:timeout])
             end
           end
