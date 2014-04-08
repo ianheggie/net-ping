@@ -31,6 +31,7 @@ module Net
         end
       end
       return "ICMP not supported in Rubinius due to something returning string not list" if defined? Rubinius
+      return "ICMP not supported in Windows due to Errno::EAFNOSUPPORT An address incompatible with the requested protocol was used. bugs" if defined? File::ALT_SEPARATOR
       nil
     end
 
