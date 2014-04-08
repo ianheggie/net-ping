@@ -62,22 +62,55 @@ class TestNetPing2HTTP < Test::Unit::TestCase
     check_good_host_behaviour
     check_bad_hosts_behaviour(self.bad_hosts)
 
-=begin
-    # Accessors
-    %w{code proxied proxied? follow_redirect?}.each do |method|
-      test "has #{method} method" do
-        assert_respond_to(@ping, method)
-      end
+    test 'redirect_limit defaults to 5' do
+      assert_equal(5, @ping.redirect_limit)
     end
 
-    %w{follow_redirect redirect_limit user_agent ssl_verify_mode get_request response}.each do |method|
-      setter = "#{method}="
-      test "has working #{setter} method" do
-        assert_respond_to(@ping, setter)
-        @ping.send(setter, 42)
-        assert_equal(42, @ping.send(method))
-      end
+    test 'redirects succeed by default' do
+      res = @ping.ping?(@redirect)
+      assert_true(res, "ping returned #{res}, exception = #{@ping.exception.inspect}")
     end
+
+    test 'redirect fail if follow_redirect is set to false' do
+      @ping.follow_redirect = false
+      assert_false(@ping.ping?(@redirect))
+    end
+
+    test 'ping with redirect limit set to zero fails' do
+      @ping.redirect_limit = 0
+      assert_false(@ping.ping?(@redirect))
+      assert_equal('Redirect limit exceeded', @ping.exception)
+    end
+
+    test 'ping with get_request=true option' do
+      @ping.get_request = true
+      res = @ping.ping?(@uri)
+      assert_true(res, 'exception = %s' % @ping.exception)
+    end
+
+    test 'ping with http proxy and get_request=true' do
+      ENV['http_proxy'] = 'http://proxymoxie:3128'
+      @ping.get_request = true
+      assert_true(@ping.ping?(@uri))
+      assert_true(@ping.proxied)
+    end
+
+    test 'ping with https proxy and get_request=true' do
+      ENV['http_proxy'] = 'https://proxymoxie:3128'
+      @ping.get_request = true
+      assert_true(@ping.ping?(@uri))
+      assert_true(@ping.proxied?)
+    end
+
+    test 'ping with no_proxy and get_request=true' do
+      ENV['no_proxy'] = 'google.com'
+      @ping.get_request = true
+      assert_true(@ping.ping?(@uri))
+      assert_false(@ping.proxied)
+    end
+
+=begin
+
 
     test 'ping requires host argument' do
       #noinspection RubyArgCount
@@ -197,25 +230,7 @@ class TestNetPing2HTTP < Test::Unit::TestCase
       assert_true(@ping.ping?(@uri))
     end
 
-    test 'redirect_limit defaults to 5' do
-      assert_equal(5, @ping.redirect_limit)
-    end
 
-    test 'redirects succeed by default' do
-      res = @ping.ping?(@redirect)
-      assert_true(res, "ping returned #{res}, exception = #{@ping.exception.inspect}")
-    end
-
-    test 'redirect fail if follow_redirect is set to false' do
-      @ping.follow_redirect = false
-      assert_false(@ping.ping?(@redirect))
-    end
-
-    test 'ping with redirect limit set to zero fails' do
-      @ping.redirect_limit = 0
-      assert_false(@ping.ping?(@redirect))
-      assert_equal('Redirect limit exceeded', @ping.exception)
-    end
 
     test 'http 502 sets exception' do
       assert_false(@ping.ping?(@bad_gateway))
@@ -232,32 +247,7 @@ class TestNetPing2HTTP < Test::Unit::TestCase
       assert_true(res, 'exception = %s' % @ping.exception)
     end
 
-    test 'ping with get option' do
-      @ping.get_request = true
-      res = @ping.ping?(@uri)
-      assert_true(res, 'exception = %s' % @ping.exception)
-    end
 
-    test 'ping with http proxy' do
-      ENV['http_proxy'] = 'http://proxymoxie:3128'
-      @ping.get_request = true
-      assert_true(@ping.ping?(@uri))
-      assert_true(@ping.proxied)
-    end
-
-    test 'ping with https proxy' do
-      ENV['http_proxy'] = 'https://proxymoxie:3128'
-      @ping.get_request = true
-      assert_true(@ping.ping?(@uri))
-      assert_true(@ping.proxied?)
-    end
-
-    test 'ping with no_proxy' do
-      ENV['no_proxy'] = 'google.com'
-      @ping.get_request = true
-      assert_true(@ping.ping?(@uri))
-      assert_false(@ping.proxied)
-    end
 =end
 
   else
