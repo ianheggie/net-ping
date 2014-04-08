@@ -30,6 +30,7 @@ module Net
           return PermissionError, 'ICMP requires elevated security'
         end
       end
+      return "ICMP not supported in Rubinius due to something returning string not list" if defined? Rubinius
       nil
     end
 
