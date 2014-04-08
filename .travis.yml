@@ -10,7 +10,7 @@ before_install:
 - bundle --version
 - bash test/setup_ubuntu.bash
 bundler_args: --binstubs
-script: rvmsudo_secure_path=1 rvmsudo UNREACHABLE_ROUTE=192.0.2.1 UNREACHABLE_HOST=`test/find_unreachable_host.bash` PING2_CLASSES=$PING2_CLASSES bin/rake test
+script: rvmsudo_secure_path=1 rvmsudo UNREACHABLE_ROUTE=192.0.2.1 UNREACHABLE_HOST=`test/find_unreachable_host.bash` `env | egrep '^TRAVIS'` PING2_CLASSES=$PING2_CLASSES bin/rake test
 matrix:
   include:
     - rvm: 1.8.7
