@@ -120,7 +120,7 @@ module TestHelper
         started = Time.now
         @result = @ping.ping?(host)
         @duration = Time.now - started
-        assert_false(@result, "ping?(#{host}) should be false, exception =# {@ping.exception}, response = #{@ping.response}")
+        assert_false(@result, "ping?(#{host}) should be false, exception = #{@ping.exception}, response = #{@ping.response}")
         assert_false(@ping.success?)
         ['exception', 'success', should_be_set].flatten.each do |method|
           assert_not_nil(@ping.send(method), "#{method} should be set on failure") if method

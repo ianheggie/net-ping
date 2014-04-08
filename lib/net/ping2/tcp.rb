@@ -91,7 +91,8 @@ module Net
           begin
             # Where addr[0][3] is an IP address
             sock.connect_nonblock(Socket.pack_sockaddr_in(port, addr[0][3]))
-          rescue Errno::EINPROGRESS
+          rescue Errno::EINPROGRESS => err
+            @exception = err
             # No-op, continue below
           rescue Exception => err
             # Something has gone horribly wrong
@@ -133,7 +134,7 @@ module Net
 
         # There is no duration if the ping failed
         @duration = Time.now - start_time if @success
-
+        @exception = nil if @success
         @success
       end
 

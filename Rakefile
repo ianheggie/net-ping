@@ -24,11 +24,11 @@ Rake::TestTask.new do |t|
 end
 
 namespace 'test' do
-  %w{external http icmp tcp udp wmi}.each do |protocol|
+  %w{external http icmp tcp udp wmi base}.each do |protocol|
     Rake::TestTask.new(protocol) do |t|
        t.warning = true
        t.verbose = true
-       t.test_files = FileList['test/test_net_ping_%s.rb' % protocol]
+       t.test_files = FileList['test/test_net_ping2_%s.rb' % protocol]
     end
   end
 end
