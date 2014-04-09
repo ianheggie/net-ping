@@ -94,7 +94,7 @@ module Net
             sock.connect_nonblock(Socket.pack_sockaddr_in(port, addr[0][3]))
           rescue Errno::EINPROGRESS => err
             @exception = err
-            # No-op, continue below
+              # No-op, continue below
           rescue Exception => err
             # Something has gone horribly wrong
             @exception = err
