@@ -30,6 +30,8 @@ class TestNetPing2External < Test::Unit::TestCase
     check_good_host_behaviour
     check_bad_hosts_behaviour(self.bad_hosts, %w{response})
 
+    check_thread_safety
+
 =begin
 
     test "pinging a good host returns true" do

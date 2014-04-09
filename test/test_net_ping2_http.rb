@@ -62,6 +62,8 @@ class TestNetPing2HTTP < Test::Unit::TestCase
     check_good_host_behaviour
     check_bad_hosts_behaviour(self.bad_hosts)
 
+    check_thread_safety
+
     test 'redirect_limit defaults to 5' do
       assert_equal(5, @ping.redirect_limit)
     end

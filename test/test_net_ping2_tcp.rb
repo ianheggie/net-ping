@@ -39,7 +39,11 @@ class TestNetPing2Tcp < Test::Unit::TestCase
 
     check_good_host_behaviour
     check_bad_hosts_behaviour(self.bad_hosts)
-    #check_service_check :port => 22
+
+    check_good_service_check :port => 22
+    #check_bad_service_check :port => 22
+
+    check_thread_safety
 
 
 =begin

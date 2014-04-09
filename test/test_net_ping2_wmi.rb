@@ -27,6 +27,8 @@ class TestNetPing2WMI < Test::Unit::TestCase
     check_good_host_behaviour
     check_bad_hosts_behaviour(self.bad_hosts)
 
+    check_thread_safety
+
 
     def test_ping_basic
       assert_respond_to(@ping_with_host, :ping)

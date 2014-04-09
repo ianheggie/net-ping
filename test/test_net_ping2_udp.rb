@@ -35,7 +35,11 @@ class TestNetPing2UDP < Test::Unit::TestCase
 
     check_good_host_behaviour
     check_bad_hosts_behaviour(self.bad_hosts)
-    check_service_check
+
+    check_good_service_check
+    check_bad_service_check
+
+    check_thread_safety
 
 =begin
     test 'ping basic functionality' do

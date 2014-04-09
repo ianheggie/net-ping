@@ -37,6 +37,8 @@ class TestNetPing2ICMP < Test::Unit::TestCase
     check_good_host_behaviour
     check_bad_hosts_behaviour(self.bad_hosts)
 
+    check_thread_safety
+
 =begin
     test "icmp ping basic functionality" do
       assert_respond_to(@icmp, :ping)

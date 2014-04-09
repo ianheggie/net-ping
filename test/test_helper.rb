@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-if ENV['TRAVIS'] && ! ENV['TRAVIS_EXCLUDE_COVERALLS']
+if ENV['TRAVIS'] && !ENV['TRAVIS_EXCLUDE_COVERALLS']
   require 'coveralls'
   Coveralls.wear!
 end
@@ -134,7 +134,7 @@ module TestHelper
     end
   end
 
-  def check_service_check(options={})
+  def check_good_service_check(options={})
     klass = self
     define_method "test_pinging_a_good_service_returns_true_and_sets_attributes_accordingly" do
       assert_respond_to(@ping, :service_check)
@@ -149,6 +149,10 @@ module TestHelper
       end
       assert_kind_of(Float, @ping.duration, 'duration should be a float on success')
     end
+  end
+
+  def check_bad_service_check(options={})
+    klass = self
     define_method "test_pinging_a_bad_service_returns_false_and_sets_attributes_accordingly" do
       assert_respond_to(@ping, :service_check)
       @ping.service_check = true
@@ -167,7 +171,37 @@ module TestHelper
       end
       assert_true(@duration < 3.9, "pinging bad_service should take < 3.9 seconds, actually took #{@duration}")
     end
+  end
 
+  def ping_hosts_sequentially(hosts, klass)
+    hosts.collect do |ip|
+      p = klass.new(:host => ip, :timeout => 2)
+      [ip, p.ping?(ip)]
+    end
+  end
+
+  def ping_hosts_in_parallel(hosts, klass)
+    threads = hosts.collect do |ip|
+      Thread.new(ip) do |ip|
+        p = klass.new(:host => ip, :timeout => 2)
+        [ip, p.ping?(ip)]
+      end
+    end
+    threads.collect do |t|
+      t.join
+      t.value
+    end
+  end
+
+  def check_thread_safety
+    klass = self
+    define_method 'test_multiple_threads_return_same_value_as_sequential_checks' do
+      hosts = ['8.8.4.4', '8.8.9.9', '127.0.0.1', '8.8.8.8', '8.8.8.9']
+      sequentially = klass.ping_hosts_sequentially(hosts, @ping.class)
+      in_parallel = klass.ping_hosts_in_parallel(hosts, @ping.class)
+      assert_equal(sequentially, in_parallel, "#{@ping.class} Should work the same in threads")
+      assert_equal(hosts.size, sequentially.size, "#{@ping.class} sequential should have results for all the hosts")
+    end
   end
 
 
