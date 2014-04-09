@@ -19,7 +19,9 @@ matrix:
     - rvm: 1.9.2
     - rvm: 1.9.3
     - rvm: 2.0.0
+      env: TRAVIS_EXCLUDE_COVERALLS=true
     - rvm: 2.1.0
+      env: TRAVIS_EXCLUDE_COVERALLS=true
     - rvm: jruby-19mode
     - rvm: rbx-2.2.6
     # upcoming releases
