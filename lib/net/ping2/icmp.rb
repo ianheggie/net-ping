@@ -68,7 +68,7 @@ module Net
       super(host, options)
       @success = false
 
-      opt1 = (options.key?(:port) ? {:service_check => true, :data_must_match => (options[:port] == 7)} : {})
+      opt1 = (options.key?(:port) ? {:data_must_match => (options[:port] == 7)} : {})
       opt2 = {
           :timeout => @timeout,
           :bind_host => @bind_host,

@@ -31,10 +31,11 @@ class TestNetPing2UDP < Test::Unit::TestCase
     check_class_methods
     check_attr_readers
     check_attr_accessors :port, :service_check
-    check_defaults :service_check => false
+    check_defaults :service_check => false, :port => 7
 
     check_good_host_behaviour
     check_bad_hosts_behaviour(self.bad_hosts)
+    check_service_check
 
 =begin
     test 'ping basic functionality' do

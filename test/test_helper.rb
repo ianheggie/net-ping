@@ -99,7 +99,6 @@ module TestHelper
   end
 
   def check_good_host_behaviour(should_be_set = [], should_be_nil = [])
-
     define_method "test_pinging_a_good_host_returns_true_and_sets_attributes_accordingly" do
       assert_true(@ping.ping?(LOCALHOST_IP), 'ping?(LOCALHOST_IP) should be true, exception = %s, response=%s' % [@ping.exception, @ping.response])
       assert_true(@ping.success?, 'success? should be true')
@@ -133,6 +132,42 @@ module TestHelper
         assert_true(@duration < 3.9, "pinging #{name} should take < 3.9 seconds, actually took #{@duration}")
       end
     end
+  end
+
+  def check_service_check(options={})
+    klass = self
+    define_method "test_pinging_a_good_service_returns_true_and_sets_attributes_accordingly" do
+      assert_respond_to(@ping, :service_check)
+      @ping.service_check = true
+      assert_true(@ping.ping?(LOCALHOST_IP, options), 'ping?(LOCALHOST_IP) should be true, exception = %s, response=%s' % [@ping.exception, @ping.response])
+      assert_true(@ping.success?, 'success? should be true')
+      ['duration', 'response', 'success'].flatten.each do |method|
+        assert_not_nil(@ping.send(method), "#{method} should be set on success") if method
+      end
+      ['exception'].flatten.each do |method|
+        assert_nil(@ping.send(method), "#{method} should be nil on success") if method
+      end
+      assert_kind_of(Float, @ping.duration, 'duration should be a float on success')
+    end
+    define_method "test_pinging_a_bad_service_returns_false_and_sets_attributes_accordingly" do
+      assert_respond_to(@ping, :service_check)
+      @ping.service_check = true
+      @ping.timeout = 2
+      @ping.port = klass.blackhole_port
+      started = Time.now
+      @result = @ping.ping?(LOCALHOST_IP)
+      @duration = Time.now - started
+      assert_false(@result, "ping?(bad_service) should be false, exception = #{@ping.exception}, response = #{@ping.response}")
+      assert_false(@ping.success?)
+      ['exception', 'success'].flatten.each do |method|
+        assert_not_nil(@ping.send(method), "#{method} should be set on failure") if method
+      end
+      ['duration'].flatten.each do |method|
+        assert_nil(@ping.send(method), "#{method} should be nil on failure") if method
+      end
+      assert_true(@duration < 3.9, "pinging bad_service should take < 3.9 seconds, actually took #{@duration}")
+    end
+
   end
 
 
