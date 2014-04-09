@@ -181,9 +181,10 @@ module Net
           http_response = Timeout.timeout(timeout) do
             http.start { |h| h.request(request) }
           end
-
         rescue Exception => err
           @exception = err.message
+        ensure
+          http.open_timeout = 999  # DEBUG
         end
         @code = http_response.code if http_response
         http_response
