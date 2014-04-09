@@ -135,7 +135,6 @@ module TestHelper
   end
 
   def check_good_service_check(options={})
-    klass = self
     define_method "test_pinging_a_good_service_returns_true_and_sets_attributes_accordingly" do
       assert_respond_to(@ping, :service_check)
       @ping.service_check = true
@@ -182,13 +181,12 @@ module TestHelper
 
   def ping_hosts_in_parallel(hosts, klass)
     threads = hosts.collect do |ip|
-      Thread.new(ip) do |ip|
-        p = klass.new(:host => ip, :timeout => 2)
-        [ip, p.ping?(ip)]
+      Thread.new(ip) do |thread_ip|
+        p = klass.new(:host => thread_ip, :timeout => 2)
+        [thread_ip, p.ping?(thread_ip)]
       end
     end
     threads.collect do |t|
-      t.join
       t.value
     end
   end
