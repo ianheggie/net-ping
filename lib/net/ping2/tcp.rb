@@ -49,6 +49,7 @@ module Net
       def initialize(options = {})
         @port = 80
         @service_check = false
+        @data = nil
         super(options)
       end
 
