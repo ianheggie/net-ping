@@ -8,7 +8,6 @@ before_install:
 - gem --version
 - gem install bundler
 - bundle --version
-- ruby -e 'require "pp"; pp ENV'
 bundler_args: --binstubs
 script: 
 - bin/rake build

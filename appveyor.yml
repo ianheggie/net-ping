@@ -6,6 +6,8 @@ platform:
   #- x86
   - x64
 environment:
+  COVERALLS_REPO_TOKEN:
+    secure: JxHANtYypFsy2w/wrfMZPXxs26jH8FCcNzEk0pRFwyDvInIS81AMa4FtV2AVeWmv
   matrix:
     - PING2_CLASSES: ""
       RUBYGEMS_VERSION: ""
@@ -21,12 +23,7 @@ install:
   - gem --version
   - gem install bundler
   - bundle --version
-  - ruby -e 'require "pp"; pp ENV'
-  - cmd: echo hello from batch command
-  - ps: Write-Host "Hello!"
-  - cmd: bundle install --binstubs
-  - cmd: path
-  - cmd: set
+  - bundle install --binstubs
 hosts:
   localhost: 127.0.0.1
 build_script:
