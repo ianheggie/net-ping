@@ -7,7 +7,7 @@ group :test do
   gem "rcov", ">= 0", :platforms => :mri_18
   gem "simplecov", "~> 0.7.1", :require => false, :platforms => :ruby_19
   gem 'ruby-debug-ide', '0.4.23.beta1', :platform => :ruby_19
-  gem 'coveralls', :require => false
+  gem 'coveralls', :require => false, :git => 'git://github.com/ianheggie/coveralls-ruby.git'
 end
     
 group :development do
