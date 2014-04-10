@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-if ENV['TRAVIS'] && !ENV['TRAVIS_EXCLUDE_COVERALLS']
+if ENV['TRAVIS']
   require 'coveralls'
   Coveralls.wear!
 end
