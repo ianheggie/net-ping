@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-if ENV['TRAVIS']
+if ENV['TRAVIS'] || ENV['APPVEYOR']
   require 'coveralls'
   Coveralls.wear!
 end
