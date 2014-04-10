@@ -21,6 +21,7 @@ install:
   - gem --version
   - gem install bundler
   - bundle --version
+  - ruby -e 'require "pp"; pp ENV'
   - cmd: echo hello from batch command
   - ps: Write-Host "Hello!"
   - cmd: bundle install --binstubs
