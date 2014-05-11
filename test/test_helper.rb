@@ -129,7 +129,7 @@ module TestHelper
         ['duration', should_be_nil].flatten.each do |method|
           assert_nil(@ping.send(method), "#{method} should be nil on failure") if method
         end
-        assert_true(@duration < 3.9, "pinging #{name} should take < 3.9 seconds, actually took #{@duration}")
+        assert_true(@duration < 4.1, "pinging #{name} should take < 4.1 seconds, actually took #{@duration}")
       end
     end
   end
@@ -194,7 +194,7 @@ module TestHelper
   def check_thread_safety
     klass = self
     define_method 'test_multiple_threads_return_same_value_as_sequential_checks' do
-      hosts = ['8.8.4.4', '8.8.9.9', '127.0.0.1', '8.8.8.8', '8.8.8.9']
+      hosts = ['8.8.4.4', '8.8.9.9', '127.0.0.1', '8.8.8.8', '8.8.8.9'] * 2
       sequentially = klass.ping_hosts_sequentially(hosts, @ping.class)
       in_parallel = klass.ping_hosts_in_parallel(hosts, @ping.class)
       assert_equal(sequentially, in_parallel, "#{@ping.class} Should work the same in threads")

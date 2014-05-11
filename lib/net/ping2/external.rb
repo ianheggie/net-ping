@@ -29,7 +29,6 @@ module Net
         @success = false
         @response = ''
 
-
         case RbConfig::CONFIG['host_os']
           when /linux/i
             pcmd += ['-c', '1', '-W', timeout.to_s, host]
