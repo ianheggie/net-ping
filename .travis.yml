@@ -22,7 +22,7 @@ matrix:
     - rvm: jruby-19mode
     - rvm: rbx-2.2.6
     # upcoming releases
-    - rvm: rbx
+    - rvm: rbx-head
       env: TESTOPTS=-v
     - rvm: jruby-head
       env: TESTOPTS=-v
@@ -35,5 +35,5 @@ matrix:
       env: TESTOPTS=-v PING2_CLASSES=all
   allow_failures:
     - rvm: ruby-head
-    - rvm: rbx
+    - rvm: rbx-head
     - rvm: jruby-head
