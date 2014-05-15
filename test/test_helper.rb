@@ -175,7 +175,7 @@ module TestHelper
   def ping_hosts_sequentially(hosts, klass)
     hosts.collect do |ip|
       p = klass.new(:host => ip, :timeout => 2)
-      [ip, p.ping?(ip)]
+      [ip, p.ping?(ip) || p.exception ]
     end
   end
 
@@ -183,7 +183,7 @@ module TestHelper
     threads = hosts.collect do |ip|
       Thread.new(ip) do |thread_ip|
         p = klass.new(:host => thread_ip, :timeout => 2)
-        [thread_ip, p.ping?(thread_ip)]
+        [thread_ip, p.ping?(thread_ip) || p.exception]
       end
     end
     threads.collect do |t|
