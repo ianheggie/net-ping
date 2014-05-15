@@ -29,7 +29,7 @@ matrix:
     - rvm: ruby-head
       env: TESTOPTS=-v
     # show bugs
-    - rvm: rbx
+    - rvm: rbx-head
       env: TESTOPTS=-v PING2_CLASSES=all
     - rvm: ruby-head
       env: TESTOPTS=-v PING2_CLASSES=all
