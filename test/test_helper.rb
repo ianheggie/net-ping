@@ -194,9 +194,10 @@ module TestHelper
   def check_thread_safety
     klass = self
     define_method 'test_multiple_threads_return_same_value_as_sequential_checks' do
-      # must be distinct ip# for udp pings
       hosts = ['8.8.4.4', '8.8.9.9', '127.0.0.1', '127.0.0.2', '127.0.0.3', '8.8.8.8', '8.8.8.9', '208.67.222.222',
                '209.244.0.3', '209.244.0.4', '127.0.0.3', '127.0.0.4', '127.0.0.5', '8.8.8.7', '208.67.220.220' ]
+      # must be distinct ip# for udp pings
+      hosts.reject! {|h| h =~ /^127\.0\.0\.[2-9]/} if @ping.class.to_s =~ /UDP/i
       sequentially = klass.ping_hosts_sequentially(hosts, @ping.class)
       in_parallel = klass.ping_hosts_in_parallel(hosts, @ping.class)
       assert_equal(sequentially, in_parallel, "#{@ping.class} Should work the same in threads")
