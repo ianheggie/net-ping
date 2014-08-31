@@ -6,7 +6,10 @@ gemspec
 group :test do
   gem "rcov", ">= 0", :platforms => :mri_18
   gem "simplecov", "~> 0.7.1", :require => false, :platforms => :ruby_19
-  gem 'ruby-debug-ide', '0.4.23.beta1', :platform => :ruby_19
+  if File.exist?('.idea') or File.exist?('nbproject') or File.exist?('.project') or File.exist?('.settings')
+    # required for ruby-mine and other IDE's, but fails to install under travis-ci
+    gem 'ruby-debug-ide', '0.4.23.beta1', :platform => :ruby_19
+  end
   gem 'coveralls', :require => false, :git => 'git://github.com/ianheggie/coveralls-ruby.git'
   if RUBY_VERSION =~ /^1\.8/
     # coveralls requires rest-client, but 1.7+ versions require ruby 1.9.3
