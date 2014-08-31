@@ -27,7 +27,7 @@ matrix:
     - rvm: ruby-head
       env: TESTOPTS=-v
     # show bugs
-    - rvm: rbx-head
+    - rvm: rbx-2.2.6
       env: TESTOPTS=-v PING2_CLASSES=all
     - rvm: ruby-head
       env: TESTOPTS=-v PING2_CLASSES=all
