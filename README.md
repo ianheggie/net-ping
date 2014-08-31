@@ -2,8 +2,6 @@
 
 Net::Ping2 - Check a remote host for reachability, with optional service check.
 
-** UNDER DEVELOPMENT **
-
 This gem contains classes to test the reachability of remote hosts on a network.  A ping object is first created with optional parameters, a variable number of hosts may be pinged multiple times and then the connection is closed.
 
 You may choose one of five different protocols to use for the ping. The "tcp" protocol is the default. Note that a live remote host may still fail to be pingable by one or more of these protocols. For example, www.microsoft.com is generally alive but not "icmp" pingable.
@@ -49,19 +47,19 @@ Or install it yourself as:
 
     require 'net/ping2'
 
-    p = Net::Pings.new();
+    p = Net::Ping2.new();
 
     host = 'www.github.com'
     puts "%s is %s" % [host, p.ping?($host) ? 'alive' : 'dead']
 
-    p = Net::Ping->new("icmp");
+    p = Net::Ping2.new("icmp");
     p->bind($my_addr); # Specify source interface of pings
     foreach $host (@host_array)
     {
-    puts "$host is ";
-    puts "NOT " unless p->ping($host, 2);
-    puts "reachable.\n";
-    sleep(1);
+      puts "$host is ";
+      puts "NOT " unless p->ping($host, 2);
+      puts "reachable.\n";
+      sleep(1);
     }
     p->close();
     p = Net::Ping->new("tcp", 2);
@@ -69,19 +67,19 @@ Or install it yourself as:
     p->port_number(scalar(getservbyname("http", "tcp")));
     while ($stop_time > time())
     {
-    print "$host not reachable ", scalar(localtime()), "\n"
-    unless p->ping($host);
-    sleep(300);
+      print "$host not reachable ", scalar(localtime()), "\n"
+      unless p->ping($host);
+      sleep(300);
     }
     undef(p);
     # Like tcp protocol, but with many hosts
     p = Net::Ping->new("syn");
     p->port_number(getservbyname("http", "tcp"));
     foreach $host (@host_array) {
-    p->ping($host);
+      p->ping($host);
     }
     while (($host,$rtt,$ip) = p->ack) {
-    print "HOST: $host [$ip] ACKed in $rtt seconds.\n";
+      print "HOST: $host [$ip] ACKed in $rtt seconds.\n";
     }
     # High precision syntax (requires Time::HiRes)
     p = Net::Ping->new();
