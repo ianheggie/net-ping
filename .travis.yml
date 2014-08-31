@@ -34,3 +34,5 @@ matrix:
   allow_failures:
     - rvm: ruby-head
     - rvm: jruby-head
+    - rvm: rbx-2.2.6
+      env: TESTOPTS=-v PING2_CLASSES=all
