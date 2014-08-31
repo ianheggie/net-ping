@@ -8,6 +8,10 @@ group :test do
   gem "simplecov", "~> 0.7.1", :require => false, :platforms => :ruby_19
   gem 'ruby-debug-ide', '0.4.23.beta1', :platform => :ruby_19
   gem 'coveralls', :require => false, :git => 'git://github.com/ianheggie/coveralls-ruby.git'
+  if RUBY_VERSION =~ /^1\.8/
+    # coveralls requires rest-client, but 1.7+ versions require ruby 1.9.3
+    gem 'rest-client' , '~>1.6.8'
+  end
 end
     
 group :development do

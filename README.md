@@ -33,6 +33,8 @@ Originally based on code from djberg96's net-ping gem, the API and testing metho
 Add this line to your application's Gemfile:
 
     gem 'net-ping2'
+    # OR
+    gem 'net-ping2', :github => 'ianheggie/net-ping2'  # development version
 
 And then execute:
 
