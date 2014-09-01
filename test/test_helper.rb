@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
 
-if RUBY_VERSION !~ /^1\.8/ && (ENV['TRAVIS'] || ENV['APPVEYOR'])
-  require 'coveralls'
-  Coveralls.wear!
-end
+# Disabled - it causes too many failures due to net timeout
+#if RUBY_VERSION !~ /^1\.8/ && (ENV['TRAVIS'] || ENV['APPVEYOR'])
+#  require 'coveralls'
+#  Coveralls.wear!
+#end
 
 require 'test-unit'
 

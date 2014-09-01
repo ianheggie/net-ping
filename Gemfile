@@ -10,11 +10,11 @@ group :test do
     # required for ruby-mine and other IDE's, but fails to install under travis-ci
     gem 'ruby-debug-ide', '0.4.23.beta1', :platform => :ruby_19
   end
-  gem 'coveralls', :require => false, :git => 'git://github.com/ianheggie/coveralls-ruby.git'
-  if RUBY_VERSION =~ /^1\.8/
-    # coveralls requires rest-client, but 1.7+ versions require ruby 1.9.3
-    gem 'rest-client' , '~>1.6.8'
-  end
+  #gem 'coveralls', :require => false, :git => 'git://github.com/ianheggie/coveralls-ruby.git'
+  #if RUBY_VERSION =~ /^1\.8/
+  #  # coveralls requires rest-client, but 1.7+ versions require ruby 1.9.3
+  #  gem 'rest-client' , '~>1.6.8'
+  #end
 end
     
 group :development do

@@ -26,7 +26,6 @@ Originally based on code from djberg96's net-ping gem, the API and testing metho
 [![Build Status](https://travis-ci.org/ianheggie/net-ping2.svg?branch=master)](https://travis-ci.org/ianheggie/net-ping2)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/h18gcp0psjmhp0d6)](https://ci.appveyor.com/project/ianheggie/net-ping2)
 [![Dependency Status](https://gemnasium.com/ianheggie/net-ping2.svg)](https://gemnasium.com/ianheggie/net-ping2)
-[![Coverage Status](https://coveralls.io/repos/ianheggie/net-ping2/badge.png)](https://coveralls.io/r/ianheggie/net-ping2)
 
 ## Installation
 

@@ -6,8 +6,8 @@ platform:
   #- x86
   - x64
 environment:
-  COVERALLS_REPO_TOKEN:
-    secure: JxHANtYypFsy2w/wrfMZPXxs26jH8FCcNzEk0pRFwyDvInIS81AMa4FtV2AVeWmv
+  #COVERALLS_REPO_TOKEN:
+  #  secure: JxHANtYypFsy2w/wrfMZPXxs26jH8FCcNzEk0pRFwyDvInIS81AMa4FtV2AVeWmv
   matrix:
     - PING2_CLASSES: ""
       RUBYGEMS_VERSION: ""
