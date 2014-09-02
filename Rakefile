@@ -34,3 +34,14 @@ namespace 'test' do
 end
 
 task :default => :test
+
+desc "Note it is the end after 1 sec pause"
+task :finale do
+   puts "..."
+   sleep(1)
+   puts "That's all folks!"
+end
+
+Rake::Task["test"].enhance do
+  Rake::Task["finale"].invoke
+end
