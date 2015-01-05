@@ -19,6 +19,7 @@ matrix:
     - rvm: 1.9.3
     - rvm: 2.0.0
     - rvm: 2.1.2
+    - rvm: 2.2.0
     - rvm: jruby-19mode
     - rvm: rbx-2.2.6
     # upcoming releases
@@ -34,5 +35,6 @@ matrix:
   allow_failures:
     - rvm: ruby-head
     - rvm: jruby-head
+    - rvm: 2.2.0
     - rvm: rbx-2.2.6
       env: TESTOPTS=-v PING2_CLASSES=all
